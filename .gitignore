@@ -129,3 +129,4 @@ dmypy.json
 
 *.code-workspace
 .vscode/
+db/

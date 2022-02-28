@@ -1,31 +1,38 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from message_handler import MessageHandler
+from fastapi import Depends, FastAPI, HTTPException
 
+from typing import List
+
+from sqlalchemy.orm import Session
+from sql_app import crud, models, schemas
+from sql_app.database import SessionLocal, engine
+
+models.Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
-message_handler = MessageHandler()
-
-class ChangedRelation(BaseModel):
-    pddl: str
-
-class ErrorMessage(BaseModel):
-    error: str
 
 @app.head("/")
 def index():
     return "online"
 
-@app.post("/changed_relation")
-def get_cr(item: ChangedRelation):
-    message_handler.add_incoming_environment_message(item.pddl)
-    return "OK"
+@app.post("/add_message", response_model=schemas.Message)
+def add_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):
+    return crud.create_message(db=db, item=item)
 
-@app.post("/error_message")
-def get_err(item: ErrorMessage):
-    message_handler.add_incoming_error_message(item.error)
-    return "OK"
+@app.post("/add_error_message", response_model=schemas.ErrorCreate)
+def add_error_message(item: schemas.ErrorCreate, db: Session = Depends(get_db)):
+    return crud.create_error(db=db, item=item)
 
-@app.get("/get_em_message")
-def get_em_message():
-    return {"message": message_handler.get_outgoing_environment_message()}
+@app.get("/update_sent_message")
+def update_sent_parameter_of_message_with_ID(db: Session = Depends(get_db), id: int = 0):
+    return crud.update_sent_message(db=db, message_id=id, sent=True)
+
+@app.get("/get_messages", response_model=List[schemas.Message])
+def get_messages_not_sent(db: Session = Depends(get_db)):
+    return crud.get_messages_not_sent(db=db)
