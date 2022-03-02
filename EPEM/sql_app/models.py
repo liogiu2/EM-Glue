@@ -11,16 +11,29 @@ SQLAlchemy uses the term "model" to refer to these classes and instances that in
 """
 
 
-class Message(Base):
-    __tablename__ = "message"
+class EnvironmentMessage(Base):
+    __tablename__ = "environment_message"
 
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String)
     sent = Column(Boolean, default=False)
     created = Column(DateTime, default = datetime.datetime.now)
     last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
-    # items = relationship("Item", back_populates="owner")
+    EM_source_message_id = Column(Integer, ForeignKey("EM_message.id"), default= -1)
+    
+    EM_source_message = relationship("EMMessage", foreign_keys=[EM_source_message_id], uselist=False)
 
+class EMMessage(Base):
+    __tablename__ = "EM_message"
+
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String)
+    sent = Column(Boolean, default=False)
+    created = Column(DateTime, default = datetime.datetime.now)
+    last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
+    environment_source_message_id = Column(Integer, ForeignKey("environment_message.id"), default= -1)
+
+    environment_source_message = relationship("EnvironmentMessage", foreign_keys=[environment_source_message_id], uselist=False)
 
 class Error(Base):
     __tablename__ = "error"
@@ -31,6 +44,6 @@ class Error(Base):
     error_type = Column(String, default="")
     created = Column(DateTime, default = datetime.datetime.now)
     last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
-    #owner_id = Column(Integer, ForeignKey("users.id"))
+    EM_source_message_id = Column(Integer, ForeignKey("EM_message.id"), default= -1)
 
-    # owner = relationship("User", back_populates="items")
+    EM_source_message = relationship("EMMessage", foreign_keys=[EM_source_message_id], uselist=False)

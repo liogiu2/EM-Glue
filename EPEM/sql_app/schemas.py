@@ -12,8 +12,11 @@ class MessageBase(BaseModel):
     text: str
 
 
-class MessageCreate(MessageBase):
-    pass
+class EnvironmentMessageCreate(MessageBase):
+    EM_source_message_id: Optional[int] = -1
+
+class EMMessageCreate(MessageBase):
+    environment_source_message_id: Optional[int] = -1
 
 class Message(MessageBase):
     id: int
@@ -21,11 +24,22 @@ class Message(MessageBase):
     created: datetime = datetime.now()
     last_updated: datetime = datetime.now()
 
+
+class EnvironmentMessage(Message):
+    EM_source_message_id: int = -1
+
+    class Config:
+        orm_mode = True
+
+class EMMessage(Message):
+    environment_source_message_id: int = -1
+    
     class Config:
         orm_mode = True
 
 class ErrorCreate(MessageBase):
     error_type: str = ""
+    EM_source_message_id: Optional[int] = -1
 
 
 class Error(MessageBase):
@@ -34,6 +48,7 @@ class Error(MessageBase):
     sent: bool = False
     created: datetime = datetime.now()
     last_updated: datetime = datetime.now()
+    EM_source_message_id: int = -1
 
     class Config:
         orm_mode = True

@@ -15,14 +15,12 @@ import subprocess
 import atexit
 from EPEM_manager import EPEM_Manager
 
-fastapi_process_environment = None
-fastapi_process_em = None
+fastapi_process = None
 camelot_process = None
 
 def close_all():
-    global fastapi_process_environment, camelot_process, fastapi_process_em
-    fastapi_process_environment.terminate()
-    fastapi_process_em.terminate()
+    global fastapi_process, camelot_process
+    fastapi_process.terminate()
     camelot_process.kill()
 
 def main(argv):
@@ -45,9 +43,9 @@ def main(argv):
             logging.basicConfig(filename='logs/python/'+logname, filemode='w', format='%(levelname)s:%(message)s', level=logging.DEBUG)
         elif opt == '-S':
             os.chdir("EPEM")
-            global fastapi_process_environment, camelot_process, fastapi_process_em
-            fastapi_process_environment = subprocess.Popen(["uvicorn", "environment_IO_communication:app", "--reload", "--port 8080"])
-            fastapi_process_em = subprocess.Popen(["uvicorn", "EM_IO_communication:app", "--reload", "--port 8081"])
+            Path("db/").mkdir(parents=True, exist_ok=True)
+            global fastapi_process, camelot_process
+            fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--reload", "--port 8080"])
             camelot_process = subprocess.Popen("cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe", shell = True)
             atexit.register(close_all)
 
