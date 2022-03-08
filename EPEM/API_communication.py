@@ -3,7 +3,7 @@ import uvicorn
 from API_inizialization import *
 
 @app.head("/")
-def index():
+def is_online():
     """
     This api call is used to allow the terminals to check if the server is running.
     """
@@ -13,8 +13,10 @@ def index():
 def add_environment_message(item: schemas.EnvironmentMessageCreate, db: Session = Depends(get_db)):
     """
     This api call is used to add an environment message to the database.
-    Method : Post
-    Url : /add_env_message
+
+    ***Method*** : Post
+
+    ***Url*** : /add_env_message
 
     Parameters
     ----------
@@ -37,8 +39,10 @@ def add_environment_message(item: schemas.EnvironmentMessageCreate, db: Session 
 def add_experience_manager_message(item: schemas.EMMessageCreate, db: Session = Depends(get_db)):
     """
     The api call is used to add an experience manager message to the database.
-    Method : Post
-    Url : /add_EM_message
+
+    ***Method*** : Post
+
+    ***Url*** : /add_EM_message
 
     Parameters
     ----------
@@ -61,8 +65,10 @@ def add_experience_manager_message(item: schemas.EMMessageCreate, db: Session = 
 def add_error_message(item: schemas.ErrorCreate, db: Session = Depends(get_db)):
     """
     The api call is used to add an error message to the database.
-    Method : Post
-    Url : /add_error_message
+
+    ***Method*** : Post
+
+    ***Url*** : /add_error_message
 
     Parameters
     ----------
@@ -81,16 +87,15 @@ def add_error_message(item: schemas.ErrorCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Error on Foreign Key")
     return res
 
-# @app.get("/update_sent_message")
-# def update_sent_parameter_of_message_with_ID(db: Session = Depends(get_db), id: int = 0):
-#     return crud.update_sent_env_message(db=db, message_id=id, sent=True)
 
-@app.get("/get_EM_messages", response_model=List[schemas.EMMessage])
+@app.get("/get_messages_for_env", response_model=List[schemas.EMMessage])
 def get_experience_manager_messages_not_sent(db: Session = Depends(get_db)):
     """
-    The api call is used to get all the experience manager messages that have not already being sent.
-    Method : Get
-    Url : /get_EM_messages
+    The api call is used to get all the messages for the environment that have not already being sent.
+
+    ***Method*** : Get
+
+    ***Url*** : /get_messages_for_env
 
     Returns
     -------
@@ -98,17 +103,17 @@ def get_experience_manager_messages_not_sent(db: Session = Depends(get_db)):
         The messages that have not already being sent.
     """
     res = crud.get_messages_not_sent_from_EM(db=db)
-    for item in res:
-        item.sent = True
-        db.commit()
+    res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
 
-@app.get("/get_env_messages", response_model=List[schemas.EnvironmentMessage])
+@app.get("/get_messages_for_EM", response_model=List[schemas.EnvironmentMessage])
 def get_environment_messages_not_sent(db: Session = Depends(get_db)):
     """
-    The api call is used to get all the environment messages that have not already being sent.
-    Method : Get
-    Url : /get_env_messages
+    The api call is used to get all the messages for the experience manager that have not already being sent.
+
+    ***Method*** : Get
+
+    ***Url*** : /get_messages_for_EM
 
     Returns
     -------
@@ -116,17 +121,17 @@ def get_environment_messages_not_sent(db: Session = Depends(get_db)):
         The messages that have not already being sent.
     """
     res = crud.get_messages_not_sent_from_env(db=db)
-    for item in res:
-        item.sent = True
-        db.commit()
+    res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
 
 @app.get("/get_error_messages", response_model=List[schemas.Error])
 def get_error_messages_not_sent(db: Session = Depends(get_db)):
     """
     The api call is used to get all the error messages that have not already being sent.
-    Method : Get
-    Url : /get_error_messages
+
+    ***Method*** : Get
+
+    ***Url*** : /get_error_messages
 
     Returns
     -------
@@ -134,9 +139,7 @@ def get_error_messages_not_sent(db: Session = Depends(get_db)):
         The messages that have not already being sent.
     """
     res = crud.get_error_messages_not_sent(db=db)
-    for item in res:
-        item.sent = True
-        db.commit()
+    res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
 
 if __name__ == "__main__":

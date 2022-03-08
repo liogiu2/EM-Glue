@@ -25,14 +25,18 @@ There are two main sections: one is dedicated to the Experience Manager calls an
 
     - **/add_EM_message**: Allows you to create a new message for the environment coming from the experience manager.
 
-    - **/get_env_messages**: Allows you to get all the messages that have not already sent from the environment.
+    - **/get_messages_for_EM**: Allows you to get all the messages that have not already sent that are directed to the experience manager.
+
+    - **/get_error_messages**: Allows you to get all the error messages sent from the environment.
 
 
 ## Environment calls
 
     - **/add_env_message**: Allows you to create a new message for the experience manager coming from the environment.
 
-    - **/get_EM_messages**: Allows you to get all the messages that are not sent from the experience manager.
+    - **/get_messages_for_env**: Allows you to get all the messages that have not already sent that are directed to the environment.
+
+    - **/add_error_message**: Allows you to creat a new error message.
 """
 
 app = FastAPI(

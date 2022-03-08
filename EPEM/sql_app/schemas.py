@@ -14,9 +14,11 @@ class MessageBase(BaseModel):
 
 class EnvironmentMessageCreate(MessageBase):
     EM_source_message_id: Optional[int] = -1
+    message_for_platform: Optional[bool] = False
 
 class EMMessageCreate(MessageBase):
     environment_source_message_id: Optional[int] = -1
+    message_for_platform: Optional[bool] = False
 
 class Message(MessageBase):
     id: int

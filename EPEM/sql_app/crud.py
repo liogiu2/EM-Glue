@@ -35,13 +35,17 @@ def get_messages_not_sent_from_EM(db: Session):
     """
     This method is used to get all messages from the experience manager that are not sent.
     """
-    return db.query(models.EMMessage).filter(models.EMMessage.sent == False).order_by(models.EMMessage.created).all()
+    return db.query(models.EMMessage)\
+            .filter(models.EMMessage.sent == False, models.EMMessage.message_for_platform == False)\
+            .order_by(models.EMMessage.created).all()
 
 def get_messages_not_sent_from_env(db: Session):
     """
     This method is used to get all messages from the environment that are not sent.
     """
-    return db.query(models.EnvironmentMessage).filter(models.EnvironmentMessage.sent == False).order_by(models.EnvironmentMessage.created).all()
+    return db.query(models.EnvironmentMessage)\
+            .filter(models.EnvironmentMessage.sent == False, models.EnvironmentMessage.message_for_platform == False)\
+            .order_by(models.EnvironmentMessage.created).all()
 
 def get_error_messages_not_sent(db: Session):
     """
@@ -109,3 +113,12 @@ def update_sent_env_message(db: Session, message_id: int, sent: bool):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+def update_sent_before_sending(query_result, db: Session):
+    """
+    This method is used to update the sent field of a set of messages coming from a query result.
+    """
+    for message in query_result:
+        message.sent = True
+    db.commit()
+    return query_result
