@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from .database import Base
+from sql_app.database import Base
 
 import datetime
 
@@ -10,38 +10,33 @@ This python file is used to create all the tables that will be used in the datab
 SQLAlchemy uses the term "model" to refer to these classes and instances that interact with the database.
 """
 
-
-class EnvironmentMessage(Base):
+class User(Base):
     """
-    Class that represents the messages that are sent from the environment.
+    Class that represents each user of the platform (EM, Env, or platform itself)
     """
-    __tablename__ = "environment_message"
+    __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id_user = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    role = Column(String)
+
+class Message(Base):
+    """
+    Class that represents a message.
+    """
+    __tablename__ = "message"
+
+    id_message = Column(Integer, primary_key=True, index=True)
     text = Column(String)
     sent = Column(Boolean, default=False)
     created = Column(DateTime, default = datetime.datetime.now)
     last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
-    message_for_platform = Column(Boolean, default=False)
-    EM_source_message_id = Column(Integer, ForeignKey("EM_message.id"), default= -1)
-    
-    EM_source_message = relationship("EMMessage", foreign_keys=[EM_source_message_id], uselist=False)
+    from_user = Column(Integer, ForeignKey('user.id_user'))
+    to_user = Column(Integer, ForeignKey('user.id_user'))
 
-class EMMessage(Base):
-    """
-    Class that represents the messages that are sent from the experience manager.
-    """
-    __tablename__ = "EM_message"
+    from_user_rel = relationship("User", foreign_keys=[from_user], uselist= False)
+    to_user_rel = relationship("User", foreign_keys=[to_user], uselist= False)
 
-    id = Column(Integer, primary_key=True, index=True)
-    text = Column(String)
-    sent = Column(Boolean, default=False)
-    created = Column(DateTime, default = datetime.datetime.now)
-    last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
-    message_for_platform = Column(Boolean, default=False)
-    environment_source_message_id = Column(Integer, ForeignKey("environment_message.id"), default= -1)
-
-    environment_source_message = relationship("EnvironmentMessage", foreign_keys=[environment_source_message_id], uselist=False)
 
 class Error(Base):
     """
@@ -55,19 +50,20 @@ class Error(Base):
     error_type = Column(String, default="")
     created = Column(DateTime, default = datetime.datetime.now)
     last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
-    EM_source_message_id = Column(Integer, ForeignKey("EM_message.id"), default= -1)
+    source_message_id = Column(Integer, ForeignKey("message.id_message"), default= -1)
 
-    EM_source_message = relationship("EMMessage", foreign_keys=[EM_source_message_id], uselist=False)
+    source_message = relationship("Message", foreign_keys=[source_message_id], uselist=False)
 
-class PlatformMessage(Base):
+class MessageHistory(Base):
     """
-    Class that represents the messages that are sent from the platform.
+    Class that represents the message history.
     """
-    __tablename__ = "platform_message"
+    __tablename__ = "message_history"
 
-    id = Column(Integer, primary_key=True, index=True)
-    text = Column(String)
-    sent = Column(Boolean, default=False)
-    created = Column(DateTime, default = datetime.datetime.now)
-    last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
-    recepient = Column(String, default="")
+    id_message_history = Column(Integer, primary_key=True, index=True)
+    id_message_initial = Column(Integer, ForeignKey("message.id_message"))
+    id_message_reply = Column(Integer, ForeignKey("message.id_message"))
+
+    message_initial = relationship("Message", foreign_keys=[id_message_initial], uselist=False)
+    message_reply = relationship("Message", foreign_keys=[id_message_reply], uselist=False)
+    

@@ -9,8 +9,19 @@ def is_online():
     """
     return "online"
 
-@app.post("/add_env_message", response_model=schemas.EnvironmentMessage)
-def add_environment_message(item: schemas.EnvironmentMessageCreate, db: Session = Depends(get_db)):
+@app.post("/add_user", response_model=schemas.User)
+def add_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    """
+    This api call is used to add a new user to the database.
+    """
+    try:
+        res = crud.create_user(db=db, item=user)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    return res
+
+@app.post("/add_env_message", response_model=schemas.Message)
+def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):
     """
     This api call is used to add an environment message to the database.
 
@@ -20,23 +31,23 @@ def add_environment_message(item: schemas.EnvironmentMessageCreate, db: Session 
 
     Parameters
     ----------
-    item : schemas.EnvironmentMessageCreate
+    item : schemas.Message
         The message that will be added to the database.
     
     Returns
     -------
-    schemas.EnvironmentMessage
+    schemas.MessageCreate
         The message that was added to the database.
     or HTTPException error 400 
         if the message was not added.
     """
-    res = crud.create_env_message(db=db, item=item)
+    res = crud.create_message(db=db, item=item)
     if res is None:
         raise HTTPException(status_code=400, detail="Error on Foreign Key")
     return res
 
-@app.post("/add_EM_message", response_model=schemas.EMMessage)
-def add_experience_manager_message(item: schemas.EMMessageCreate, db: Session = Depends(get_db)):
+@app.post("/add_EM_message", response_model=schemas.Message)
+def add_experience_manager_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):
     """
     The api call is used to add an experience manager message to the database.
 
@@ -46,17 +57,17 @@ def add_experience_manager_message(item: schemas.EMMessageCreate, db: Session = 
 
     Parameters
     ----------
-    item : schemas.EMMessageCreate
+    item : schemas.Message
         The message that will be added to the database.
 
     Returns
     -------
-    schemas.EMMessage
+    schemas.MessageCreate
         The message that was added to the database.
     or HTTPException error 400
         if the message was not added.
     """
-    res = crud.create_EM_message(db=db, item=item)
+    res = crud.create_message(db=db, item=item)
     if res is None:
         raise HTTPException(status_code=400, detail="Error on Foreign Key")
     return res
@@ -88,8 +99,8 @@ def add_error_message(item: schemas.ErrorCreate, db: Session = Depends(get_db)):
     return res
 
 
-@app.get("/get_messages_for_env", response_model=List[schemas.EMMessage])
-def get_experience_manager_messages_not_sent(db: Session = Depends(get_db)):
+@app.get("/get_messages_for_env", response_model=List[schemas.Message])
+def get_messages_for_environment_not_sent(db: Session = Depends(get_db)):
     """
     The api call is used to get all the messages for the environment that have not already being sent.
 
@@ -99,15 +110,15 @@ def get_experience_manager_messages_not_sent(db: Session = Depends(get_db)):
 
     Returns
     -------
-    List[schemas.EMMessage]
+    List[schemas.Message]
         The messages that have not already being sent.
     """
-    res = crud.get_messages_not_sent_from_EM(db=db)
+    res = crud.get_messages_not_sent_for_env(db=db)
     res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
 
-@app.get("/get_messages_for_EM", response_model=List[schemas.EnvironmentMessage])
-def get_environment_messages_not_sent(db: Session = Depends(get_db)):
+@app.get("/get_messages_for_EM", response_model=List[schemas.Message])
+def get_messages_for_EM_not_sent(db: Session = Depends(get_db)):
     """
     The api call is used to get all the messages for the experience manager that have not already being sent.
 
@@ -117,10 +128,10 @@ def get_environment_messages_not_sent(db: Session = Depends(get_db)):
 
     Returns
     -------
-    List[schemas.EnvironmentMessage]
+    List[schemas.Message]
         The messages that have not already being sent.
     """
-    res = crud.get_messages_not_sent_from_env(db=db)
+    res = crud.get_messages_not_sent_for_EM(db=db)
     res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
 
