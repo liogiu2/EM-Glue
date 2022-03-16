@@ -52,6 +52,22 @@ class Message(MessageBase):
     class Config:
         orm_mode = True
 
+class MessageHistoryCreate(BaseModel):
+    """
+    Base class for the MessageHistoryCreate model.
+    """
+    id_message_initial: int
+    id_message_reply: int
+
+class MessageHistory(MessageCreate):
+    """
+    Base class for the MessageHistory model.
+    """
+    id_message_history: int
+
+    class Config:
+        orm_mode = True
+
 
 class ErrorCreate(MessageBase):
     """

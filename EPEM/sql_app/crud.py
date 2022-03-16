@@ -10,6 +10,17 @@ CRUD comes from: Create, Read, Update, and Delete.
 #--------------------------------------------------------------------------
 # -----------------------------------GET-----------------------------------
 #--------------------------------------------------------------------------
+def get_user_with_ID(db: Session, id_user: int):
+    """
+    This method is used to get a user from the database based on the ID.
+    """
+    return db.query(models.User).filter(models.User.id_user == id_user).first()
+
+def get_user_with_role(db: Session, role: str):
+    """
+    This method is used to get a user from the database based on the role.
+    """
+    return db.query(models.User).filter(models.User.role == role).first()
 
 def get_errors(db: Session, skip: int = 0, limit: int = 100):
     """
@@ -55,7 +66,7 @@ def create_user(db: Session, item: schemas.UserCreate):
     """
     This method is used to create a user in the database.
     """
-    if item.role not in ["EM", "ENV"]:
+    if item.role not in ["EM", "ENV", "PLATFORM"]:
         raise Exception("Invalid role, must be EM or ENV")
     db_item = models.User(**item.dict())
     db.add(db_item)
@@ -67,9 +78,42 @@ def create_message(db: Session, item: schemas.MessageCreate):
     """
     This method is used to create an environment message in the database.
     """
-    pass
-    delattr(item, 'old_message_id')
+    old_message = 0
+    if hasattr(item, "old_message_id"):
+        if item.old_message_id > 0:
+            res = db.query(models.Message).filter(models.Message.id_message == item.old_message_id).first()
+            if res is None:
+                raise Exception("Invalid old_message_id")
+            old_message = res.id_message
+        delattr(item, 'old_message_id')
+        db_item = __create_message(db, item)
+        if old_message > 0:
+            __create_message_history(db, schemas.MessageHistoryCreate(id_message_initial=old_message, id_message_reply=db_item.id_message))
+    else:
+        db_item = __create_message(db, item)
+    return db_item
+
+def __create_message(db: Session, item: schemas.MessageCreate):
+    """
+    PRIVATE METHOD. PLEASE DON'T USE IT EXTERNALLY.
+    This method is used to create a message in the database. 
+    """
+    if get_user_with_ID(db, item.to_user) is None:
+        raise Exception("Invalid to_user, ID not found")
+    if get_user_with_ID(db, item.from_user) is None:
+        raise Exception("Invalid from_user, ID not found")
     db_item = models.Message(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+def __create_message_history(db: Session, item: schemas.MessageHistoryCreate):
+    """
+    PRIVATE METHOD. PLEASE DON'T USE IT EXTERNALLY.
+    This method is used to create a message history in the database. 
+    """
+    db_item = models.MessageHistory(**item.dict())
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
@@ -79,7 +123,7 @@ def create_error(db: Session, item: schemas.ErrorCreate):
     """
     This method is used to create an error in the database.
     """
-    if item.EM_source_message_id != -1:
+    if item.source_message_id != -1:
         res = db.query(models.Error).filter(models.Error.id == item.source_message_id).first()
         if res is None:
             return None

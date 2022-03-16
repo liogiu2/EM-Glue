@@ -41,9 +41,10 @@ def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(g
     or HTTPException error 400 
         if the message was not added.
     """
-    res = crud.create_message(db=db, item=item)
-    if res is None:
-        raise HTTPException(status_code=400, detail="Error on Foreign Key")
+    try:
+        res = crud.create_message(db=db, item=item)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail= str(e))
     return res
 
 @app.post("/add_EM_message", response_model=schemas.Message)
@@ -67,9 +68,10 @@ def add_experience_manager_message(item: schemas.MessageCreate, db: Session = De
     or HTTPException error 400
         if the message was not added.
     """
-    res = crud.create_message(db=db, item=item)
-    if res is None:
-        raise HTTPException(status_code=400, detail="Error on Foreign Key")
+    try:
+        res = crud.create_message(db=db, item=item)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail= str(e))
     return res
 
 @app.post("/add_error_message", response_model=schemas.Error)

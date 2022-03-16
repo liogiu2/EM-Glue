@@ -44,3 +44,11 @@ app = FastAPI(
     description=description,
     version="0.1.0"
 )
+
+def add_platform_user():
+    db = SessionLocal()
+    if crud.get_user_with_role(db, role="PLATFORM") is None:
+        crud.create_user(db=db, item=schemas.UserCreate(name="Platform", role="PLATFORM"))
+    db.close()
+    
+add_platform_user()
