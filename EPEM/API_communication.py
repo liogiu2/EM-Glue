@@ -1,6 +1,8 @@
 import uvicorn
 #Refer to API_inizialization.py for more information on imports and inizialization
 from API_inizialization import *
+from communication_protocol_phases import CommunicationProtocolPhases
+import shared_variables
 
 @app.head("/")
 def is_online():
@@ -9,16 +11,29 @@ def is_online():
     """
     return "online"
 
-@app.post("/add_user", response_model=schemas.User)
-def add_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@app.get("/inizialization_em", response_model=schemas.MessageBase)
+def inizialization_em(name : str = "Experience Manager", db: Session = Depends(get_db)):
     """
-    This api call is used to add a new user to the database.
+    This api call is used to send the inizialization message to the evaluation platform.
+
+    ***Method*** : GET
+
+    ***Url*** : /inizialization_em
+
+    Parameters
+    ----------
+    name : str
+        The name of the experience manager.
     """
+    if shared_variables.communication_protocol_phase != CommunicationProtocolPhases.PHASE_1:
+        raise HTTPException(status_code=404)
     try:
-        res = crud.create_user(db=db, item=user)
+        res = crud.create_user(db=db, item=schemas.UserCreate(name=name, role="EM"))
     except Exception as e:
         raise HTTPException(status_code=400, detail= str(e))
-    return res
+    platform = crud.get_user_with_role(db, role="PLATFORM")
+    message = crud.create_message(db=db, item=schemas.MessageCreate(text="inizialization_em_1 Received", sender_id=res.id, receiver_id=platform.id))
+    return {"text": "inizialization step 1 completed"}
 
 @app.post("/add_env_message", response_model=schemas.Message)
 def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):

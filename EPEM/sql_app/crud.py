@@ -52,6 +52,14 @@ def get_messages_not_sent_for_EM(db: Session):
             .filter(models.Message.sent == False, models.User.role == "EM")\
             .order_by(models.Message.created).all()
 
+def get_messages_not_sent_for_Platform(db: Session):
+    """
+    This method is used to get all messages from the environment that are not sent.
+    """
+    return db.query(models.Message).join(models.User, models.Message.to_user == models.User.id_user)\
+            .filter(models.Message.sent == False, models.User.role == "PLATFORM")\
+            .order_by(models.Message.created).all()
+
 def get_error_messages_not_sent(db: Session):
     """
     This method is used to get all error messages that are not sent.

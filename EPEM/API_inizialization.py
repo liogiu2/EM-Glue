@@ -9,7 +9,6 @@ from sql_app.database import SessionLocal, engine
 # Create the database
 models.Base.metadata.create_all(bind=engine)
 
-# Method used on the API calls to get the database and work with it.
 def get_db():
     db = SessionLocal()
     try:

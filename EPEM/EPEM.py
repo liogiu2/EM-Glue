@@ -44,13 +44,16 @@ def main(argv):
         elif opt == '-S':
             os.chdir("EPEM")
             Path("db/").mkdir(parents=True, exist_ok=True)
-            global fastapi_process, camelot_process
+            global fastapi_process
             fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--reload", "--port 8080"])
-            camelot_process = subprocess.Popen("cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe", shell = True)
             atexit.register(close_all)
 
     EPEM_Manager().main_loop()
-    
+
+def start_camelot():
+    global camelot_process
+    if camelot_process is None:
+        camelot_process = subprocess.Popen("cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe", shell = True)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
