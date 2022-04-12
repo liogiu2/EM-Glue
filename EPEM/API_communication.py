@@ -1,8 +1,7 @@
 import uvicorn
 #Refer to API_inizialization.py for more information on imports and inizialization
 from API_inizialization import *
-from communication_protocol_phases import CommunicationProtocolPhases
-import shared_variables
+from sql_app.exceptions import *
 
 @app.head("/")
 def is_online():
@@ -10,6 +9,13 @@ def is_online():
     This api call is used to allow the terminals to check if the server is running.
     """
     return "online"
+
+@app.get("/protocol_phase")
+def check_protocol_phase(db: Session = Depends(get_db)):
+    """
+    This api call is used to allow the terminals to check if the server is running.
+    """
+    return crud.get_shared_data_with_name(db=db, name="protocol_phase").value
 
 @app.get("/inizialization_em", response_model=schemas.MessageBase)
 def inizialization_em(name : str = "Experience Manager", db: Session = Depends(get_db)):
@@ -25,15 +31,55 @@ def inizialization_em(name : str = "Experience Manager", db: Session = Depends(g
     name : str
         The name of the experience manager.
     """
-    if shared_variables.communication_protocol_phase != CommunicationProtocolPhases.PHASE_1:
+    if crud.get_shared_data_with_name(db=db, name="protocol_phase").value != "PHASE_1":
         raise HTTPException(status_code=404)
+
     try:
         res = crud.create_user(db=db, item=schemas.UserCreate(name=name, role="EM"))
-    except Exception as e:
+    except InvalidRoleException as e:
         raise HTTPException(status_code=400, detail= str(e))
+
     platform = crud.get_user_with_role(db, role="PLATFORM")
-    message = crud.create_message(db=db, item=schemas.MessageCreate(text="inizialization_em_1 Received", sender_id=res.id, receiver_id=platform.id))
-    return {"text": "inizialization step 1 completed"}
+
+    try:
+        crud.create_message(db=db, item=schemas.MessageCreate(text=communication_phase_messages["PHASE_1"]["message_in"], from_user=res.id_user, to_user=platform.id_user))
+    except InvalidMessageIDException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    except InvalidUserException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    return {"text": communication_phase_messages["PHASE_1"]["message_out"]}
+
+@app.get("/inizialization_env", response_model=schemas.MessageBase)
+def inizialization_em(name : str = "Environment", db: Session = Depends(get_db)):
+    """
+    This api call is used to send the inizialization message to the evaluation platform from the environment.
+
+    ***Method*** : GET
+
+    ***Url*** : /inizialization_env
+
+    Parameters
+    ----------
+    name : str
+        The name of the environment.
+    """
+    if crud.get_shared_data_with_name(db=db, name="protocol_phase").value == "PHASE_2":
+        raise HTTPException(status_code=404)
+
+    try:
+        res = crud.create_user(db=db, item=schemas.UserCreate(name=name, role="ENV"))
+    except InvalidRoleException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+
+    platform = crud.get_user_with_role(db, role="PLATFORM")
+
+    try:
+        crud.create_message(db=db, item=schemas.MessageCreate(text=communication_phase_messages["PHASE_2"]["message_in"], from_user = res.id_user, to_user = platform.id_user))
+    except InvalidMessageIDException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    except InvalidUserException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    return {"text": communication_phase_messages["PHASE_2"]["message_out"]}
 
 @app.post("/add_env_message", response_model=schemas.Message)
 def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):
@@ -58,7 +104,9 @@ def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(g
     """
     try:
         res = crud.create_message(db=db, item=item)
-    except Exception as e:
+    except InvalidMessageIDException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
     return res
 
@@ -85,7 +133,9 @@ def add_experience_manager_message(item: schemas.MessageCreate, db: Session = De
     """
     try:
         res = crud.create_message(db=db, item=item)
-    except Exception as e:
+    except InvalidMessageIDException as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
     return res
 

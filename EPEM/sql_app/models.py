@@ -66,4 +66,15 @@ class MessageHistory(Base):
 
     message_initial = relationship("Message", foreign_keys=[id_message_initial], uselist=False)
     message_reply = relationship("Message", foreign_keys=[id_message_reply], uselist=False)
+
+class SharedData(Base):
+    """
+    Class that represents the shared data.
+    """
+    __tablename__ = "shared_data"
+
+    id_shared_data = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    value = Column(String)
+    last_updated = Column(DateTime, default = datetime.datetime.now,  onupdate=datetime.datetime.now)
     

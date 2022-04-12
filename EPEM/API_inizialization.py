@@ -5,6 +5,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sql_app import crud, models, schemas
 from sql_app.database import SessionLocal, engine
+from utilities import read_json_file
 
 # Create the database
 models.Base.metadata.create_all(bind=engine)
@@ -43,6 +44,8 @@ app = FastAPI(
     description=description,
     version="0.1.0"
 )
+
+communication_phase_messages = read_json_file("messages.json")
 
 def add_platform_user():
     db = SessionLocal()

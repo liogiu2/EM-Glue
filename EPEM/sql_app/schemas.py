@@ -90,3 +90,22 @@ class Error(MessageBase):
 
     class Config:
         orm_mode = True
+
+class SharedData(BaseModel):
+    """
+    Base class for the SharedData model.
+    """
+    id_shared_data: int
+    name: str
+    value: str
+    last_updated: datetime = datetime.now()
+
+    class Config:
+        orm_mode = True
+
+class SharedDataCreate(BaseModel):
+    """
+    Base class for the SharedDataCreate model.
+    """
+    name: str
+    value: str

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-
+from sql_app.exceptions import *
 from sql_app import models, schemas
 
 """
@@ -16,7 +16,7 @@ def get_user_with_ID(db: Session, id_user: int):
     """
     return db.query(models.User).filter(models.User.id_user == id_user).first()
 
-def get_user_with_role(db: Session, role: str):
+def get_user_with_role(db: Session, role: str) -> models.User:
     """
     This method is used to get a user from the database based on the role.
     """
@@ -66,7 +66,11 @@ def get_error_messages_not_sent(db: Session):
     """
     return db.query(models.Error).filter(models.Error.sent == False).order_by(models.Error.created).all()
 
-
+def get_shared_data_with_name(db: Session, name: str) -> models.SharedData:
+    """
+    This method is used to get a shared data from the database based on the name.
+    """
+    return db.query(models.SharedData).filter(models.SharedData.name == name).first()
 #--------------------------------------------------------------------------
 # -----------------------------------CREATE--------------------------------
 #--------------------------------------------------------------------------
@@ -75,7 +79,7 @@ def create_user(db: Session, item: schemas.UserCreate):
     This method is used to create a user in the database.
     """
     if item.role not in ["EM", "ENV", "PLATFORM"]:
-        raise Exception("Invalid role, must be EM or ENV")
+        raise InvalidRoleException("Invalid role, must be EM or ENV")
     db_item = models.User(**item.dict())
     db.add(db_item)
     db.commit()
@@ -88,10 +92,11 @@ def create_message(db: Session, item: schemas.MessageCreate):
     """
     old_message = 0
     if hasattr(item, "old_message_id"):
-        if item.old_message_id > 0:
+        old_message = 0
+        if item.old_message_id is not None and item.old_message_id > 0:
             res = db.query(models.Message).filter(models.Message.id_message == item.old_message_id).first()
             if res is None:
-                raise Exception("Invalid old_message_id")
+                raise InvalidMessageIDException("Invalid old_message_id")
             old_message = res.id_message
         delattr(item, 'old_message_id')
         db_item = __create_message(db, item)
@@ -107,9 +112,9 @@ def __create_message(db: Session, item: schemas.MessageCreate):
     This method is used to create a message in the database. 
     """
     if get_user_with_ID(db, item.to_user) is None:
-        raise Exception("Invalid to_user, ID not found")
+        raise InvalidUserException("Invalid to_user, ID not found")
     if get_user_with_ID(db, item.from_user) is None:
-        raise Exception("Invalid from_user, ID not found")
+        raise InvalidUserException("Invalid from_user, ID not found")
     db_item = models.Message(**item.dict())
     db.add(db_item)
     db.commit()
@@ -141,6 +146,15 @@ def create_error(db: Session, item: schemas.ErrorCreate):
     db.refresh(db_item)
     return db_item
 
+def create_shared_data(db: Session, item: schemas.SharedDataCreate):
+    """
+    This method is used to create a shared data in the database.
+    """
+    db_item = models.SharedData(**item.dict())
+    db.add(db_item)
+    db.commit()
+    return db_item
+
 #--------------------------------------------------------------------------
 # -----------------------------------UPDATE--------------------------------
 #--------------------------------------------------------------------------
@@ -153,3 +167,12 @@ def update_sent_before_sending(query_result, db: Session):
         message.sent = True
     db.commit()
     return query_result
+
+def update_value_of_shared_data_with_name(db: Session, name: str, value: str):
+    """
+    This method is used to update a shared data in the database.
+    """
+    db_item = get_shared_data_with_name(db, name)
+    db_item.value = value
+    db.commit()
+    return db_item

@@ -1,0 +1,12 @@
+{
+    "MAC": 
+    {
+        "PDDL_library_path" : "/Users/giuliomori/Documents/GitHub/EV_PDDL/",
+        "environment_command" : "cd /Users/giuliomori/Downloads/Camelot\\ v1.1\\ MacOS.app/Contents/MacOS/ && open ./Camelot\\ v1.1\\ MacOS"
+    },
+    "Windows": 
+    {
+        "PDDL_library_path" : "C:\\Users\\giulio17\\Documents\\Camelot_work\\EV_PDDL",
+        "environment_command" : "cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe"
+    }
+}
