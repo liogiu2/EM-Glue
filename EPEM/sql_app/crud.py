@@ -44,6 +44,14 @@ def get_messages_not_sent_for_env(db: Session):
             .filter(models.Message.sent == False, models.User.role == "ENV")\
             .order_by(models.Message.created).all()
 
+def get_first_message_not_sent_for_ENV(db: Session):
+    """
+    This method is used to get the first message from the experience manager that is not sent.
+    """
+    return db.query(models.Message).join(models.User, models.Message.to_user == models.User.id_user)\
+            .filter(models.Message.sent == False, models.User.role == "ENV")\
+            .order_by(models.Message.created).first()
+
 def get_messages_not_sent_for_EM(db: Session):
     """
     This method is used to get all messages from the environment that are not sent.
@@ -52,13 +60,29 @@ def get_messages_not_sent_for_EM(db: Session):
             .filter(models.Message.sent == False, models.User.role == "EM")\
             .order_by(models.Message.created).all()
 
-def get_messages_not_sent_for_Platform(db: Session):
+def get_first_message_not_sent_for_EM(db: Session):
     """
-    This method is used to get all messages from the environment that are not sent.
+    This method is used to get the first message from the environment that is not sent.
+    """
+    return db.query(models.Message).join(models.User, models.Message.to_user == models.User.id_user)\
+            .filter(models.Message.sent == False, models.User.role == "EM")\
+            .order_by(models.Message.created).first()
+
+def get_messages_not_sent_for_platform(db: Session):
+    """
+    This method is used to get all messages for the platform that are not sent.
     """
     return db.query(models.Message).join(models.User, models.Message.to_user == models.User.id_user)\
             .filter(models.Message.sent == False, models.User.role == "PLATFORM")\
             .order_by(models.Message.created).all()
+
+def get_first_message_not_sent_for_platform(db: Session) -> models.Message:
+    """
+    This method is used to get the first message for the platform that is not sent.
+    """
+    return db.query(models.Message).join(models.User, models.Message.to_user == models.User.id_user)\
+            .filter(models.Message.sent == False, models.User.role == "PLATFORM")\
+            .order_by(models.Message.created).first()
 
 def get_error_messages_not_sent(db: Session):
     """
@@ -89,6 +113,15 @@ def create_user(db: Session, item: schemas.UserCreate):
 def create_message(db: Session, item: schemas.MessageCreate):
     """
     This method is used to create an environment message in the database.
+
+    Returns
+    -------
+    models.Message: 
+        The message that was created.
+    
+    Exception:
+        InvalidMessageIDException
+        InvalidUserException
     """
     old_message = 0
     if hasattr(item, "old_message_id"):

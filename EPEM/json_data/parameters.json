@@ -8,5 +8,14 @@
     {
         "PDDL_library_path" : "C:\\Users\\giulio17\\Documents\\Camelot_work\\EV_PDDL",
         "environment_command" : "cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe"
+    },
+    "url": 
+    {
+        "in_env" : "/add_env_message",
+        "out_env" : "/get_messages_for_env",
+        "err_in" : "/add_error_message",
+        "err_out" : "/get_error_messages",
+        "in_em" : "/add_EM_message",
+        "out_em" : "/get_messages_for_EM"
     }
 }

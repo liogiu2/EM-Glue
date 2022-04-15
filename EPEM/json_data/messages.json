@@ -1,12 +1,24 @@
 {
     "PHASE_1" : 
     {
-        "message_out" : "inizialization step 1 completed",
-        "message_in" : "inizialization_em_1 Received"
+        "message_1" : "inizialization step 1 completed",
+        "message_2" : "inizialization_em_1 Received"
     },
     "PHASE_2" : 
     {
-        "message_out" : "inizialization step 2 completed",
-        "message_in" : "inizialization_em_2 Received"
+        "message_3" : "inizialization step 2 completed",
+        "message_4" : "inizialization_em_2 Received"
+    },
+    "PHASE_3" : 
+    {
+        "message_5" : "request domain and problem",
+        "message_6" : "domain and problem|",
+        "message_7" : "domain and problem|"
+    },
+    "PHASE_4" : 
+    {
+        "message_8" : "received domain and problem. request links for communication",
+        "message_9" : "receved. start communication on links |",
+        "message_10" : "links |"
     }
 }
