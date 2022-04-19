@@ -107,7 +107,7 @@ def inizialization_em(text : str, db: Session = Depends(get_db)):
     
 
 @app.get("/inizialization_env", response_model=schemas.MessageBase)
-def inizialization_em(name : str = "Environment", db: Session = Depends(get_db)):
+def inizialization_em(text : str = "Environment", db: Session = Depends(get_db)):
     """
     This api call is used to send the inizialization message to the evaluation platform from the environment.
 
@@ -126,9 +126,9 @@ def inizialization_em(name : str = "Environment", db: Session = Depends(get_db))
     if protocol_phase.value == "PHASE_1":
         raise HTTPException(status_code=404)
     elif protocol_phase.value == "PHASE_2":
-        return_message = communication_protocol_phases.phase2(db=db, name=name, communication_phase_messages=communication_phase_messages)
+        return_message = communication_protocol_phases.phase2(db=db, name=text, communication_phase_messages=communication_phase_messages)
     elif protocol_phase.value == "PHASE_3":
-        return_message = communication_protocol_phases.phase3_4_ENV(db=db, text=name, communication_phase_messages=communication_phase_messages)
+        return_message = communication_protocol_phases.phase3_4_ENV(db=db, text=text, communication_phase_messages=communication_phase_messages)
     
     return return_message
 

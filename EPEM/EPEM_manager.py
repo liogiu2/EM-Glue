@@ -8,6 +8,10 @@ from EPEM_start import start_environment
 
 class EPEM_Manager:
 
+    _em_id = None
+    _plt_id = None
+    _env_id = None
+
     def __init__(self, testing = False):
         self.communication_phase_messages = read_json_file("messages.json")
         self.phase3_part1_received = False
@@ -15,9 +19,6 @@ class EPEM_Manager:
         self.pddl_text = ""
         self.__API_online = self._is_platform_online()
         self.testing = testing
-        self._em_id = None
-        self._plt_id = None
-        self._env_id = None
 
     def main_loop(self):
         """

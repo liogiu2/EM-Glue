@@ -2,12 +2,12 @@
     "PHASE_1" : 
     {
         "message_1" : "inizialization step 1 completed",
-        "message_2" : "inizialization_em_1 Received"
+        "message_2" : "inizialization_em Received"
     },
     "PHASE_2" : 
     {
         "message_3" : "inizialization step 2 completed",
-        "message_4" : "inizialization_em_2 Received"
+        "message_4" : "inizialization_env Received"
     },
     "PHASE_3" : 
     {
