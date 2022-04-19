@@ -15,6 +15,9 @@ class EPEM_Manager:
         self.pddl_text = ""
         self.__API_online = self._is_platform_online()
         self.testing = testing
+        self._em_id = None
+        self._plt_id = None
+        self._env_id = None
 
     def main_loop(self):
         """
@@ -36,12 +39,23 @@ class EPEM_Manager:
             if protocol_phase== "PHASE_1":
                 if text == self.communication_phase_messages["PHASE_1"]["message_1"]:
                     with SessionLocal() as db:
-                        self._change_protocol_phase("PHASE_2")
+                        self._em_id = int(crud.get_user_with_role(db, "EM").id_user)
+                        self._plt_id = int(crud.get_user_with_role(db, "PLATFORM").id_user)
+                        try:
+                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.communication_phase_messages["PHASE_1"]["message_2"], from_user=self._plt_id, to_user=self._em_id))
+                        except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
+                            pass
+                    self._change_protocol_phase("PHASE_2")
                     start_environment()
             elif protocol_phase == "PHASE_2":
                 if text == self.communication_phase_messages["PHASE_2"]["message_3"]:
                     with SessionLocal() as db:
-                        self._change_protocol_phase("PHASE_3")
+                        self._env_id = int(crud.get_user_with_role(db, "ENV").id_user)
+                        try:
+                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.communication_phase_messages["PHASE_2"]["message_4"], from_user=self._plt_id, to_user=self._env_id))
+                        except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
+                            pass
+                    self._change_protocol_phase("PHASE_3")
             elif protocol_phase == "PHASE_3":
                 if text == self.communication_phase_messages["PHASE_3"]["message_5"]:
                     self.phase3_part1_received = True
@@ -51,11 +65,8 @@ class EPEM_Manager:
                 
                 if self.phase3_part1_received and self.phase3_part2_received:
                     with SessionLocal() as db:
-                        em = crud.get_user_with_role(db, "EM").id_user
-                        plt = crud.get_user_with_role(db, "PLATFORM").id_user
-
                         try:
-                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.pddl_text, from_user=plt, to_user=em))
+                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.pddl_text, from_user=self._plt_id, to_user=self._em_id))
                         except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
                             pass
                         self._change_protocol_phase("PHASE_4")

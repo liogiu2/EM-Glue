@@ -44,7 +44,7 @@ def get_messages_not_sent_for_env(db: Session):
             .filter(models.Message.sent == False, models.User.role == "ENV")\
             .order_by(models.Message.created).all()
 
-def get_first_message_not_sent_for_ENV(db: Session):
+def get_first_message_not_sent_for_ENV(db: Session) -> models.Message:
     """
     This method is used to get the first message from the experience manager that is not sent.
     """
@@ -60,7 +60,7 @@ def get_messages_not_sent_for_EM(db: Session):
             .filter(models.Message.sent == False, models.User.role == "EM")\
             .order_by(models.Message.created).all()
 
-def get_first_message_not_sent_for_EM(db: Session):
+def get_first_message_not_sent_for_EM(db: Session) -> models.Message:
     """
     This method is used to get the first message from the environment that is not sent.
     """

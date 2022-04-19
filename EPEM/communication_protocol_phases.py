@@ -18,7 +18,8 @@ def phase1(db: Session, name: str, communication_phase_messages: dict):
         raise HTTPException(status_code=400, detail= str(e))
     except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
-    return {"text": communication_phase_messages["PHASE_1"]["message_2"]}
+
+    return _wait_and_return_message_for("EM", db)
 
 def phase2(db: Session, name: str, communication_phase_messages: dict):
     """
@@ -37,7 +38,7 @@ def phase2(db: Session, name: str, communication_phase_messages: dict):
         raise HTTPException(status_code=400, detail= str(e))
     except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
-    return {"text": communication_phase_messages["PHASE_2"]["message_4"]}
+    return _wait_and_return_message_for("ENV", db)
 
 def phase3_EM(db: Session, text: str, communication_phase_messages: dict):
     """
@@ -57,14 +58,7 @@ def phase3_EM(db: Session, text: str, communication_phase_messages: dict):
     except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
 
-    pddl = None
-    while pddl is None:
-        time.sleep(0.1)
-        pddl = crud.get_first_message_not_sent_for_EM(db)
-    
-    crud.update_sent_before_sending([pddl], db)
-    
-    return {"text": pddl.text}
+    return _wait_and_return_message_for("EM", db)
 
 def phase3_4_ENV(db: Session, text: str, communication_phase_messages: dict):
     """
@@ -84,11 +78,20 @@ def phase3_4_ENV(db: Session, text: str, communication_phase_messages: dict):
     except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
     
+    return _wait_and_return_message_for("ENV", db)
+
+def _wait_and_return_message_for(receiver : str, db: Session):
+    """
+    This function is used to wait for a message.
+    """
     message = None
     while message is None:
         time.sleep(0.1)
-        message = crud.get_first_message_not_sent_for_ENV(db)
-
+        if receiver == "ENV":
+            message = crud.get_first_message_not_sent_for_ENV(db)
+        elif receiver == "EM":
+            message = crud.get_first_message_not_sent_for_EM(db)
+    
     crud.update_sent_before_sending([message], db)
     
     return {"text": message.text}
