@@ -98,7 +98,12 @@ def phase3_4_ENV(db: Session, item: schemas.Inizialization, communication_phase_
     except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
     
-    return _wait_and_return_message_for("ENV", db)
+    text = _wait_and_return_message_for("ENV", db)["text"]
+    return {
+        "text" : text.split("###")[0],
+        "add_message_url" : text.split("###")[1],
+        "get_message_url" : text.split("###")[2]
+    }
 
 def phase4_EM(db: Session, text: str, communication_phase_messages: dict):
     """
@@ -118,7 +123,12 @@ def phase4_EM(db: Session, text: str, communication_phase_messages: dict):
     except InvalidUserException as e:
         raise HTTPException(status_code=400, detail= str(e))
 
-    return _wait_and_return_message_for("EM", db)
+    text = _wait_and_return_message_for("EM", db)["text"]
+    return {
+        "text" : text.split("###")[0],
+        "add_message_url" : text.split("###")[1],
+        "get_message_url" : text.split("###")[2]
+    }
 
 def _wait_and_return_message_for(receiver : str, db: Session):
     """

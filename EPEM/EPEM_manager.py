@@ -136,9 +136,9 @@ class EPEM_Manager:
         if text == self.communication_phase_messages["PHASE_4"]["message_8"]:
             with SessionLocal() as db:
                 try:
-                    t_ENV = self.communication_phase_messages["PHASE_4"]["message_9"] + " input: " + self.communication_urls["in_env"] + " output: " + self.communication_urls["out_env"]
+                    t_ENV = self.communication_phase_messages["PHASE_4"]["message_9"] + "###" + self.communication_urls["in_env"] + "###"+ self.communication_urls["out_env"]
                     crud.create_message(db = db, item = schemas.MessageCreate(text = t_ENV, from_user=self._plt_id, to_user=self._env_id))  
-                    t_EM = self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"]
+                    t_EM = self.communication_phase_messages["PHASE_4"]["message_10"] + "###" + self.communication_urls["in_em"] + "###" + self.communication_urls["out_em"]
                     crud.create_message(db = db, item = schemas.MessageCreate(text = t_EM, from_user=self._plt_id, to_user=self._em_id))        
                 except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
                     pass

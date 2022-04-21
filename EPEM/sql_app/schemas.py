@@ -122,5 +122,7 @@ class Inizialization(BaseModel):
     Base class for the InizializationEnvCreate model.
     """
     text : str
-    domain : Optional[str] = None
-    problem : Optional[str] = None
+    domain : Optional[str]
+    problem : Optional[str]
+    add_message_url : Optional[str]
+    get_message_url : Optional[str]

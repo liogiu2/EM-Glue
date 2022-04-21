@@ -18,7 +18,7 @@
     "PHASE_4" : 
     {
         "message_8" : "received domain and problem. request links for communication",
-        "message_9" : "receved. start communication on links |",
-        "message_10" : "links |"
+        "message_9" : "receved. start communication on links",
+        "message_10" : "links"
     }
 }

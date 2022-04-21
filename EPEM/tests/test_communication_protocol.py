@@ -140,12 +140,12 @@ class TestCommunicationProtocol(unittest.TestCase):
                 self.assertEqual(message.from_user, int(em.id_user))
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "EM")
-        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_3"]["message_7"], "domain": "this is a domain", "problem": "this is a problem"})
+        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_3"]["message_7"], "domain": "this is a domain", "problem": "this is a problem", "add_message_url": None, "get_message_url" : None })
 
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch("API_communication.crud.get_shared_data_with_name")
     def test_phase_3_4_API_ENV(self, mock_protocol_phase, mock_wait_and_return_message_for):
-        mock_wait_and_return_message_for.return_value = {"text": "example"}
+        mock_wait_and_return_message_for.return_value = {"text": "example ###add_message_url###get_message_url"}
         mock_protocol_phase.return_value.value = "PHASE_3"
         with TestClient(app) as client:
             with SessionLocal() as db:
@@ -204,7 +204,7 @@ class TestCommunicationProtocol(unittest.TestCase):
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch("API_communication.crud.get_shared_data_with_name")
     def test_phase_4_API_EM(self, mock_protocol_phase, mock_wait_and_return_message_for):
-        mock_wait_and_return_message_for.return_value = {"text": self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"]}
+        mock_wait_and_return_message_for.return_value = {"text": self.communication_phase_messages["PHASE_4"]["message_10"] + "###" + self.communication_urls["in_em"] + "###" + self.communication_urls["out_em"]}
         mock_protocol_phase.return_value.value = "PHASE_4"
         with TestClient(app) as client:
             with SessionLocal() as db:
@@ -221,7 +221,9 @@ class TestCommunicationProtocol(unittest.TestCase):
                 self.assertEqual(message.from_user, int(em.id_user))
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "EM")
-        self.assertEqual(response.json()['text'], self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"])
+        self.assertEqual(response.json()['text'], self.communication_phase_messages["PHASE_4"]["message_10"])
+        self.assertIsNotNone(response.json()['add_message_url'])
+        self.assertIsNotNone(response.json()['get_message_url'])
 
     @patch.object(EPEM_manager.EPEM_Manager, "_env_id", 3)
     @patch.object(EPEM_manager.EPEM_Manager, "_em_id", 2)
@@ -230,7 +232,7 @@ class TestCommunicationProtocol(unittest.TestCase):
     @patch.object(EPEM_manager.EPEM_Manager, "_is_platform_online")
     def test_phase_4_Platform(self, mock_is_platform_online, mock_wait_and_return_message_for):
         mock_is_platform_online.return_value = True
-        mock_wait_and_return_message_for.return_value = {"text": ""}
+        mock_wait_and_return_message_for.return_value = {"text": "let's try###url###url"}
         with TestClient(app) as client:
             epem = EPEM_manager.EPEM_Manager()
             t = threading.Thread(target = epem.main_loop)
@@ -246,9 +248,9 @@ class TestCommunicationProtocol(unittest.TestCase):
                 phase = crud.get_shared_data_with_name(db, "protocol_phase")
                 self.assertEqual(phase.value, "DONE")
                 message = crud.get_first_message_not_sent_for_EM(db)
-                self.assertEqual(message.text, self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"])
+                self.assertEqual(message.text, self.communication_phase_messages["PHASE_4"]["message_10"] + "###" + self.communication_urls["in_em"] + "###" + self.communication_urls["out_em"])
                 message = crud.get_first_message_not_sent_for_ENV(db)
-                self.assertEqual(message.text, self.communication_phase_messages["PHASE_4"]["message_9"] + " input: " + self.communication_urls["in_env"] + " output: " + self.communication_urls["out_env"])
+                self.assertEqual(message.text, self.communication_phase_messages["PHASE_4"]["message_9"] + "###" + self.communication_urls["in_env"] + "###" + self.communication_urls["out_env"])
             mock_is_platform_online.return_value = False
             t.join()
 
