@@ -63,7 +63,7 @@ class EPEM_Manager:
                 self._communication_protocol_phase_4(text)
                 break
     
-    def _communication_protocol_phase_1(self, text):
+    def _communication_protocol_phase_1(self, text : str):
         """
         This method is used to handle the first phase of the communication protocol
 
@@ -72,7 +72,7 @@ class EPEM_Manager:
         text : str
             The message received.
         """
-        if text == self.communication_phase_messages["PHASE_1"]["message_1"]:
+        if text.startswith(self.communication_phase_messages["PHASE_1"]["message_1"]):
             with SessionLocal() as db:
                 self._em_id = int(crud.get_user_with_role(db, "EM").id_user)
                 self._plt_id = int(crud.get_user_with_role(db, "PLATFORM").id_user)
@@ -83,7 +83,7 @@ class EPEM_Manager:
             self._change_protocol_phase("PHASE_2")
             start_environment()
     
-    def _communication_protocol_phase_2(self, text):
+    def _communication_protocol_phase_2(self, text : str):
         """
         This method is used to handle the second phase of the communication protocol
 
@@ -92,7 +92,7 @@ class EPEM_Manager:
         text : str
             The message received.
         """
-        if text == self.communication_phase_messages["PHASE_2"]["message_3"]:
+        if text.startswith(self.communication_phase_messages["PHASE_2"]["message_3"]):
             with SessionLocal() as db:
                 self._env_id = int(crud.get_user_with_role(db, "ENV").id_user)
                 try:
@@ -195,8 +195,8 @@ class EPEM_Manager:
         try:
             response = requests.head("http://127.0.0.1:8080/")
             if response.status_code == 200:
-                self.__API_online = True
+                return True
             else:
-                self.__API_online = False
+                return False
         except:
-            self.__API_online = False
+            return False

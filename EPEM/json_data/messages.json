@@ -1,19 +1,19 @@
 {
     "PHASE_1" : 
     {
-        "message_1" : "inizialization step 1 completed",
-        "message_2" : "inizialization_em Received"
+        "message_1" : "start of communication. name:",
+        "message_2" : "inizialization completed. wait preparation environment."
     },
     "PHASE_2" : 
     {
-        "message_3" : "inizialization step 2 completed",
-        "message_4" : "inizialization_env Received"
+        "message_3" : "start of communication. name:",
+        "message_4" : "inizialization completed. Request for initial state of environment."
     },
     "PHASE_3" : 
     {
         "message_5" : "request domain and problem",
-        "message_6" : "domain and problem|",
-        "message_7" : "domain and problem|"
+        "message_6" : "domain and problem",
+        "message_7" : "domain and problem"
     },
     "PHASE_4" : 
     {

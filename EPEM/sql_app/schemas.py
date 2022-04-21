@@ -1,3 +1,4 @@
+from cgitb import text
 from datetime import datetime
 from typing import List, Optional
 
@@ -115,3 +116,11 @@ class SharedDataCreate(BaseModel):
     """
     name: str
     value: str
+
+class Inizialization(BaseModel):
+    """
+    Base class for the InizializationEnvCreate model.
+    """
+    text : str
+    domain : Optional[str] = None
+    problem : Optional[str] = None

@@ -31,15 +31,16 @@ class TestCommunicationProtocol(unittest.TestCase):
         mock_wait_and_return_message_for.return_value = {"text": self.communication_phase_messages["PHASE_1"]["message_2"]}
         mock_protocol_phase.return_value.value = "PHASE_1"
         with TestClient(app) as client:
-            response = client.get("/inizialization_em", params={"text" : "Experience Manager"})
+            response = client.get("/inizialization_em", params={"text" : self.communication_phase_messages["PHASE_1"]["message_1"] + "Experience Manager"})
             with SessionLocal() as db:
                 em = crud.get_user_with_role(db, "EM")
                 self.assertEqual(em.role, "EM")
+                self.assertEqual(em.name, "Experience Manager")
                 message = crud.get_first_message_not_sent_for_platform(db)
-                self.assertEqual(message.text, self.communication_phase_messages["PHASE_1"]["message_1"])
+                self.assertEqual(message.text, self.communication_phase_messages["PHASE_1"]["message_1"] + "Experience Manager")
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "EM")
-        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_1"]["message_2"]})
+        self.assertEqual(response.json()['text'], self.communication_phase_messages["PHASE_1"]["message_2"])
 
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch("EPEM_manager.start_environment")
@@ -54,7 +55,7 @@ class TestCommunicationProtocol(unittest.TestCase):
             time.sleep(1)
             with SessionLocal() as db:
                 self.assertEqual(crud.get_shared_data_with_name(db, "protocol_phase").value, "PHASE_1")
-            response = client.get("/inizialization_em", params={"text" : "Experience Manager"})
+            response = client.get("/inizialization_em", params={"text" : self.communication_phase_messages["PHASE_1"]["message_1"] + "Experience Manager"})
             time.sleep(1)
             with SessionLocal() as db:
                 phase = crud.get_shared_data_with_name(db, "protocol_phase")
@@ -75,20 +76,21 @@ class TestCommunicationProtocol(unittest.TestCase):
         mock_wait_and_return_message_for.return_value = {"text": self.communication_phase_messages["PHASE_2"]["message_4"]}
         mock_protocol_phase.return_value.value = "PHASE_1"
         with TestClient(app) as client:
-            response = client.get("/inizialization_env", params={"text" : "Environment"})
+            response = client.post("/inizialization_env", json={"text" : "Environment"})
             self.assertEqual(response.status_code, 404)
             mock_protocol_phase.return_value.value = "PHASE_2"
-            response = client.get("/inizialization_env", params={"text" : "Environment"})
+            response = client.post("/inizialization_env", json={"text" : self.communication_phase_messages["PHASE_2"]["message_3"] + "Environment"})
             self.assertEqual(response.status_code, 200)
             with SessionLocal() as db:
                 em = crud.get_user_with_role(db, "ENV")
                 self.assertEqual(em.role, "ENV")
+                self.assertEqual(em.name, "Environment")
                 message = crud.get_first_message_not_sent_for_platform(db)
-                self.assertEqual(message.text, self.communication_phase_messages["PHASE_2"]["message_3"])
+                self.assertEqual(message.text, self.communication_phase_messages["PHASE_2"]["message_3"] + "Environment")
                 self.assertEqual(message.from_user, int(em.id_user))
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "ENV")
-        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_2"]["message_4"]})
+        self.assertEqual(response.json()['text'], self.communication_phase_messages["PHASE_2"]["message_4"])
     
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch.object(EPEM_manager.EPEM_Manager, "_plt_id")
@@ -104,7 +106,7 @@ class TestCommunicationProtocol(unittest.TestCase):
             time.sleep(1)
             with SessionLocal() as db:
                 crud.update_value_of_shared_data_with_name(db=db, name="protocol_phase", value="PHASE_2")
-            response = client.get("/inizialization_env", params={"text" : "Environment"})
+            response = client.post("/inizialization_env", json={"text" : self.communication_phase_messages["PHASE_2"]["message_3"] + "Environment"})
             time.sleep(1)
             with SessionLocal() as db:
                 phase = crud.get_shared_data_with_name(db, "protocol_phase")
@@ -119,7 +121,9 @@ class TestCommunicationProtocol(unittest.TestCase):
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch("API_communication.crud.get_shared_data_with_name")
     def test_phase_3_API_EM(self, mock_protocol_phase, mock_wait_and_return_message_for):
-        mock_wait_and_return_message_for.return_value = {"text": self.communication_phase_messages["PHASE_3"]["message_7"]}
+        mock_wait_and_return_message_for.return_value = {
+            "text": self.communication_phase_messages["PHASE_3"]["message_7"] + "###" + "this is a domain" + "###" + "this is a problem"
+        }
         mock_protocol_phase.return_value.value = "PHASE_3"
         with TestClient(app) as client:
             with SessionLocal() as db:
@@ -136,7 +140,7 @@ class TestCommunicationProtocol(unittest.TestCase):
                 self.assertEqual(message.from_user, int(em.id_user))
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "EM")
-        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_3"]["message_7"]})
+        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_3"]["message_7"], "domain": "this is a domain", "problem": "this is a problem"})
 
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch("API_communication.crud.get_shared_data_with_name")
@@ -147,15 +151,16 @@ class TestCommunicationProtocol(unittest.TestCase):
             with SessionLocal() as db:
                 crud.create_user(db=db, item=schemas.UserCreate(name="EM", role="EM"))
                 crud.create_user(db=db, item=schemas.UserCreate(name="ENV", role="ENV"))
-            response = client.get("/inizialization_env", params={"text" : "wrong"})
+            response = client.post("/inizialization_env", json={"text" : "wrong"})
             self.assertEqual(response.status_code, 400)
-            response = client.get("/inizialization_env", params={"text" : self.communication_phase_messages["PHASE_3"]["message_6"] + "An example of PDDL file"})
+            response = client.post("/inizialization_env", json={"text" : self.communication_phase_messages["PHASE_3"]["message_6"], "domain": "this is a domain", "problem": "this is a problem"})
             self.assertEqual(response.status_code, 200)
             with SessionLocal() as db:
                 env = crud.get_user_with_role(db, "ENV")
                 message = crud.get_first_message_not_sent_for_platform(db)
-                self.assertEqual(message.text.lower().startswith(self.communication_phase_messages["PHASE_3"]["message_6"]), True)
+                self.assertEqual(message.text.startswith(self.communication_phase_messages["PHASE_3"]["message_6"]), True)
                 self.assertEqual(message.from_user, int(env.id_user))
+                self.assertEqual(message.text, self.communication_phase_messages["PHASE_3"]["message_6"] + "###" + "this is a domain" + "###" + "this is a problem")
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "ENV")
     
@@ -166,7 +171,7 @@ class TestCommunicationProtocol(unittest.TestCase):
     @patch.object(EPEM_manager.EPEM_Manager, "_is_platform_online")
     def test_phase_3_Platform(self, mock_is_platform_online, mock_wait_and_return_message_for):
         mock_is_platform_online.return_value = True
-        mock_wait_and_return_message_for.return_value = {"text": ""}
+        mock_wait_and_return_message_for.return_value = {"text" : self.communication_phase_messages["PHASE_3"]["message_6"] + "###" + "this is a domain" + "###" + "this is a problem"}
         with TestClient(app) as client:
             epem = EPEM_manager.EPEM_Manager()
             t = threading.Thread(target = epem.main_loop)
@@ -185,7 +190,7 @@ class TestCommunicationProtocol(unittest.TestCase):
                 self.assertIsNone(message)
             self.assertTrue(epem.phase3_part1_received)
             self.assertFalse(epem.phase3_part2_received)
-            response = client.get("/inizialization_env", params={"text" : self.communication_phase_messages["PHASE_3"]["message_6"] + "An example of PDDL file"})
+            response = client.post("/inizialization_env", json={"text" : self.communication_phase_messages["PHASE_3"]["message_6"], "domain": "this is a domain", "problem": "this is a problem"})
             time.sleep(1)
             self.assertTrue(epem.phase3_part2_received)
             with SessionLocal() as db:
@@ -216,7 +221,7 @@ class TestCommunicationProtocol(unittest.TestCase):
                 self.assertEqual(message.from_user, int(em.id_user))
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "EM")
-        self.assertEqual(response.json(), {"text": self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"]})
+        self.assertEqual(response.json()['text'], self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"])
 
     @patch.object(EPEM_manager.EPEM_Manager, "_env_id", 3)
     @patch.object(EPEM_manager.EPEM_Manager, "_em_id", 2)
