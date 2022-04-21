@@ -12,13 +12,13 @@ class EPEM_Manager:
     _plt_id = None
     _env_id = None
 
-    def __init__(self, testing = False):
+    def __init__(self):
         self.communication_phase_messages = read_json_file("messages.json")
+        self.communication_urls = read_json_file("parameters.json")['url']
         self.phase3_part1_received = False
         self.phase3_part2_received = False
         self.pddl_text = ""
         self.__API_online = self._is_platform_online()
-        self.testing = testing
 
     def main_loop(self):
         """
@@ -27,6 +27,21 @@ class EPEM_Manager:
         self.wait_platform_online()
         
         self._change_protocol_phase("PHASE_1")
+
+        self._communication_setup()
+
+        while self._is_platform_online():
+            with SessionLocal() as db:
+                message = crud.get_first_message_not_sent_for_platform(db)
+                if message is None:
+                    time.sleep(0.1)
+                    continue
+
+    
+    def _communication_setup(self):
+        """
+        This method is used to handle the setup of the communication using the communication protocol.
+        """
 
         while self._is_platform_online():
             with SessionLocal() as db:
@@ -37,44 +52,97 @@ class EPEM_Manager:
                 crud.update_sent_before_sending(query_result= [message], db = db)
                 protocol_phase = self.get_protocol_phase()
                 text = str(message.text)
-            if protocol_phase== "PHASE_1":
-                if text == self.communication_phase_messages["PHASE_1"]["message_1"]:
-                    with SessionLocal() as db:
-                        self._em_id = int(crud.get_user_with_role(db, "EM").id_user)
-                        self._plt_id = int(crud.get_user_with_role(db, "PLATFORM").id_user)
-                        try:
-                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.communication_phase_messages["PHASE_1"]["message_2"], from_user=self._plt_id, to_user=self._em_id))
-                        except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
-                            pass
-                    self._change_protocol_phase("PHASE_2")
-                    start_environment()
-            elif protocol_phase == "PHASE_2":
-                if text == self.communication_phase_messages["PHASE_2"]["message_3"]:
-                    with SessionLocal() as db:
-                        self._env_id = int(crud.get_user_with_role(db, "ENV").id_user)
-                        try:
-                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.communication_phase_messages["PHASE_2"]["message_4"], from_user=self._plt_id, to_user=self._env_id))
-                        except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
-                            pass
-                    self._change_protocol_phase("PHASE_3")
-            elif protocol_phase == "PHASE_3":
-                if text == self.communication_phase_messages["PHASE_3"]["message_5"]:
-                    self.phase3_part1_received = True
-                elif text.startswith(self.communication_phase_messages["PHASE_3"]["message_6"]):
-                    self.phase3_part2_received = True
-                    self.pddl_text = str(text)
-                
-                if self.phase3_part1_received and self.phase3_part2_received:
-                    with SessionLocal() as db:
-                        try:
-                            crud.create_message(db = db, item = schemas.MessageCreate(text = self.pddl_text, from_user=self._plt_id, to_user=self._em_id))
-                        except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
-                            pass
-                        self._change_protocol_phase("PHASE_4")
-                            
-            elif protocol_phase == "PHASE_4":
-                pass
 
+            if protocol_phase== "PHASE_1":
+                self._communication_protocol_phase_1(text)
+            elif protocol_phase == "PHASE_2":
+                self._communication_protocol_phase_2(text)
+            elif protocol_phase == "PHASE_3":
+                self._communication_protocol_phase_3(text)
+            elif protocol_phase == "PHASE_4":
+                self._communication_protocol_phase_4(text)
+                break
+    
+    def _communication_protocol_phase_1(self, text):
+        """
+        This method is used to handle the first phase of the communication protocol
+
+        Parameters
+        ----------
+        text : str
+            The message received.
+        """
+        if text == self.communication_phase_messages["PHASE_1"]["message_1"]:
+            with SessionLocal() as db:
+                self._em_id = int(crud.get_user_with_role(db, "EM").id_user)
+                self._plt_id = int(crud.get_user_with_role(db, "PLATFORM").id_user)
+                try:
+                    crud.create_message(db = db, item = schemas.MessageCreate(text = self.communication_phase_messages["PHASE_1"]["message_2"], from_user=self._plt_id, to_user=self._em_id))
+                except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
+                    pass
+            self._change_protocol_phase("PHASE_2")
+            start_environment()
+    
+    def _communication_protocol_phase_2(self, text):
+        """
+        This method is used to handle the second phase of the communication protocol
+
+        Parameters
+        ----------
+        text : str
+            The message received.
+        """
+        if text == self.communication_phase_messages["PHASE_2"]["message_3"]:
+            with SessionLocal() as db:
+                self._env_id = int(crud.get_user_with_role(db, "ENV").id_user)
+                try:
+                    crud.create_message(db = db, item = schemas.MessageCreate(text = self.communication_phase_messages["PHASE_2"]["message_4"], from_user=self._plt_id, to_user=self._env_id))
+                except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
+                    pass
+            self._change_protocol_phase("PHASE_3")
+    
+    def _communication_protocol_phase_3(self, text):
+        """
+        This method is used to handle the third phase of the communication protocol
+        
+        Parameters
+        ----------
+        text : str
+            The message received.
+        """
+        if text == self.communication_phase_messages["PHASE_3"]["message_5"]:
+            self.phase3_part1_received = True
+        elif text.startswith(self.communication_phase_messages["PHASE_3"]["message_6"]):
+            self.phase3_part2_received = True
+            self.pddl_text = str(text)
+        
+        if self.phase3_part1_received and self.phase3_part2_received:
+            with SessionLocal() as db:
+                try:
+                    crud.create_message(db = db, item = schemas.MessageCreate(text = self.pddl_text, from_user=self._plt_id, to_user=self._em_id))
+                except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
+                    pass
+                self._change_protocol_phase("PHASE_4")
+    
+    def _communication_protocol_phase_4(self, text):
+        """
+        This method is used to handle the fourth phase of the communication protocol
+
+        Parameters
+        ----------
+        text : str
+            The message received.
+        """
+        if text == self.communication_phase_messages["PHASE_4"]["message_8"]:
+            with SessionLocal() as db:
+                try:
+                    t_ENV = self.communication_phase_messages["PHASE_4"]["message_9"] + " input: " + self.communication_urls["in_env"] + " output: " + self.communication_urls["out_env"]
+                    crud.create_message(db = db, item = schemas.MessageCreate(text = t_ENV, from_user=self._plt_id, to_user=self._env_id))  
+                    t_EM = self.communication_phase_messages["PHASE_4"]["message_10"] + " input: " + self.communication_urls["in_em"] + " output: " + self.communication_urls["out_em"]
+                    crud.create_message(db = db, item = schemas.MessageCreate(text = t_EM, from_user=self._plt_id, to_user=self._em_id))        
+                except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
+                    pass
+            self._change_protocol_phase("DONE")
 
     def _change_protocol_phase(self, phase: str):
         """

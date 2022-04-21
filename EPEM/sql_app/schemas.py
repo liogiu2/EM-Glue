@@ -29,6 +29,12 @@ class UserCreate(BaseModel):
 class MessageBase(BaseModel):
     text: str
 
+class MessageReceive(MessageBase):
+    """
+    Base class for the MessageCreate model.
+    """
+    to_user_role: str
+    old_message_id: Optional[int] = None
 
 class MessageCreate(MessageBase):
     """

@@ -100,7 +100,9 @@ def inizialization_em(text : str, db: Session = Depends(get_db)):
     elif protocol_phase.value == "PHASE_3":
         return_message = communication_protocol_phases.phase3_EM(db=db, text=text, communication_phase_messages=communication_phase_messages)
     elif protocol_phase.value == "PHASE_4":
-        pass
+        return_message = communication_protocol_phases.phase4_EM(db=db, text=text, communication_phase_messages=communication_phase_messages)
+    else:
+        raise HTTPException(status_code=404)
     
     return return_message
 
@@ -129,11 +131,13 @@ def inizialization_em(text : str = "Environment", db: Session = Depends(get_db))
         return_message = communication_protocol_phases.phase2(db=db, name=text, communication_phase_messages=communication_phase_messages)
     elif protocol_phase.value == "PHASE_3":
         return_message = communication_protocol_phases.phase3_4_ENV(db=db, text=text, communication_phase_messages=communication_phase_messages)
+    else:
+        raise HTTPException(status_code=404)
     
     return return_message
 
 @app.post(parameters["url"]["in_env"], response_model=schemas.Message)
-def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):
+def add_environment_message(item: schemas.MessageReceive, db: Session = Depends(get_db)):
     """
     This api call is used to add an environment message to the database.
 
@@ -153,8 +157,18 @@ def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(g
     or HTTPException error 400 
         if the message was not added.
     """
+    if not _is_communication_enabled(db):
+        raise HTTPException(status_code=404)
+
+    env_id = crud.get_user_with_role(db, "ENV").id_user
+
+    if _user_role_check(item.to_user_role):
+        to_id = crud.get_user_with_role(db, item.to_user_role).id_user
+    
+    message = schemas.MessageCreate(text = item.text, from_user = env_id, to_user = to_id, old_message_id = item.old_message_id)
+
     try:
-        res = crud.create_message(db=db, item=item)
+        res = crud.create_message(db=db, item=message)
     except InvalidMessageIDException as e:
         raise HTTPException(status_code=400, detail= str(e))
     except InvalidUserException as e:
@@ -162,7 +176,7 @@ def add_environment_message(item: schemas.MessageCreate, db: Session = Depends(g
     return res
 
 @app.post(parameters["url"]["in_em"], response_model=schemas.Message)
-def add_experience_manager_message(item: schemas.MessageCreate, db: Session = Depends(get_db)):
+def add_experience_manager_message(item: schemas.MessageReceive, db: Session = Depends(get_db)):
     """
     The api call is used to add an experience manager message to the database.
 
@@ -182,8 +196,18 @@ def add_experience_manager_message(item: schemas.MessageCreate, db: Session = De
     or HTTPException error 400
         if the message was not added.
     """
+    if not _is_communication_enabled(db):
+        raise HTTPException(status_code=404)
+
+    env_id = crud.get_user_with_role(db, "EM").id_user
+
+    if _user_role_check(item.to_user_role):
+        to_id = crud.get_user_with_role(db, item.to_user_role).id_user
+    
+    message = schemas.MessageCreate(text = item.text, from_user = env_id, to_user = to_id, old_message_id = item.old_message_id)
+
     try:
-        res = crud.create_message(db=db, item=item)
+        res = crud.create_message(db=db, item=message)
     except InvalidMessageIDException as e:
         raise HTTPException(status_code=400, detail= str(e))
     except InvalidUserException as e:
@@ -211,6 +235,9 @@ def add_error_message(item: schemas.ErrorCreate, db: Session = Depends(get_db)):
     or HTTPException error 400
         if the message was not added.
     """
+    if not _is_communication_enabled(db):
+        raise HTTPException(status_code=404)
+
     res = crud.create_error(db=db, item=item)
     if res is None:
         raise HTTPException(status_code=400, detail="Error on Foreign Key")
@@ -231,6 +258,9 @@ def get_messages_for_environment_not_sent(db: Session = Depends(get_db)):
     List[schemas.Message]
         The messages that have not already being sent.
     """
+    if not _is_communication_enabled(db):
+        raise HTTPException(status_code=404)
+
     res = crud.get_messages_not_sent_for_env(db=db)
     res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
@@ -249,6 +279,9 @@ def get_messages_for_EM_not_sent(db: Session = Depends(get_db)):
     List[schemas.Message]
         The messages that have not already being sent.
     """
+    if not _is_communication_enabled(db):
+        raise HTTPException(status_code=404)
+
     res = crud.get_messages_not_sent_for_EM(db=db)
     res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
@@ -267,9 +300,36 @@ def get_error_messages_not_sent(db: Session = Depends(get_db)):
     List[schemas.Error]
         The messages that have not already being sent.
     """
+    if not _is_communication_enabled(db):
+        raise HTTPException(status_code=404)
+        
     res = crud.get_error_messages_not_sent(db=db)
     res = crud.update_sent_before_sending(query_result = res, db=db)
     return res
+
+def _is_communication_enabled(db : Session):
+    """
+    This metdod is used to check if the communication is enabled. 
+    This means that the communication protocol phase needs to be into the state DONE.
+
+    Parameters
+    ----------
+    db : Session
+        The database session.
+    """
+    if crud.get_shared_data_with_name(db=db, name="protocol_phase").value == "DONE":
+        return True
+    else:
+        return False
+
+def _user_role_check(role : str):
+    """
+    This method is used to check if the user role is correct.
+    """
+    if role in ['ENV', 'EM', 'PLATFORM']:
+        return True
+    else:
+        raise HTTPException(status_code=400, detail="Invalid user role")
 
 if __name__ == "__main__":
     # This part is used only for debugging purposes. It makes sure that it can be run only if the script is run directly.
