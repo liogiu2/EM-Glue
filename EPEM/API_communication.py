@@ -71,7 +71,7 @@ def is_online(db: Session = Depends(get_db)):
 @app.get("/protocol_phase")
 def check_protocol_phase(db: Session = Depends(get_db)):
     """
-    This api call is used to allow the terminals to check if the server is running.
+    This api call is used to get the phase that the handshake protocol is currently in.
     """
     return crud.get_shared_data_with_name(db=db, name="protocol_phase").value
 
