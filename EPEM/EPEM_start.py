@@ -6,9 +6,11 @@ parameters = read_json_file("parameters.json")
 if os.name == 'nt':
     pddl_path = parameters["Windows"]["PDDL_library_path"]
     environment_command = parameters["Windows"]["environment_command"]
+    em_command = parameters["Windows"]["experience_manager_command"]
 else:
     pddl_path = parameters["MAC"]["PDDL_library_path"]
     environment_command = parameters["MAC"]["environment_command"]
+    em_command = parameters["MAC"]["experience_manager_command"]
 
 sys.path.insert(0, pddl_path)
 import logging
@@ -21,11 +23,13 @@ import EPEM_manager
 
 fastapi_process = None
 environment_process = None
+em_process = None
 
 def close_all():
-    global fastapi_process, environment_process
+    global fastapi_process, environment_process, em_process
     fastapi_process.terminate()
     environment_process.kill()
+    em_process.kill()
 
 def main(argv):
     try:
@@ -56,15 +60,21 @@ def main(argv):
                 pass
             Path("db/").mkdir(parents=True, exist_ok=True)
             global fastapi_process
-            fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--reload", "--port", "8080"])
+            print(os.getcwd())
+            fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--port", "8080", "--log-config", ".\log\log.ini"])
             atexit.register(close_all)
-
+    
     EPEM_manager.EPEM_Manager().main_loop()
 
 def start_environment():
     global environment_process
     if environment_process is None:
         environment_process = subprocess.Popen(environment_command, shell = True)
+
+def start_experience_manager():
+    global em_process
+    if em_process is None:
+        em_process = subprocess.Popen("start cmd.exe /k \"" + em_command + "\"", shell = True, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

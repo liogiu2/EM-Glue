@@ -54,16 +54,16 @@ class PlatformCommunication:
         str
             The handshake phase.
         """
-        if self._is_platform_online():
+        if self.is_platform_online():
             response = requests.get(self.base_link + self.protocol_phase_link)
-            return response.text
+            return response.text.replace('"', '')
         return ""
 
     def __receive_message_thread(self, message_queue: queue.Queue):
         """
         This method is used to create a thread that continuosly makes request to the platform to receive a new message when available.
         """
-        while self._is_platform_online():
+        while self.is_platform_online():
             message = self._receive_message()
             if message != "":
                 message_queue.put(message)
@@ -78,13 +78,14 @@ class PlatformCommunication:
         message : str
             The message to be sent.
         """
-        if self._is_platform_online():
+        if self.is_platform_online():
             if inizialization:
                 if type(message) == str:
                     data = {'text': message}
-                    response = requests.post(self.base_link + self.initial_message_link, json = data)
+                    print("building data: " + str(data))
+                    response = requests.get(self.base_link + self.initial_message_link, params=data)
                 elif type(message) == dict:
-                    response = requests.post(self.base_link + self.initial_message_link, json = message)
+                    response = requests.get(self.base_link + self.initial_message_link, params=message)
                 else:
                     return None
             else:
@@ -118,7 +119,7 @@ class PlatformCommunication:
         str
             The message received from the platform.
         """
-        if self._is_platform_online():
+        if self.is_platform_online():
             response = requests.get(self.base_link + self.receive_message_link)
             return response.json()['text']
         return ""
@@ -132,11 +133,11 @@ class PlatformCommunication:
         message : str
             The error message to be sent.
         """
-        if self._is_platform_online():
+        if self.is_platform_online():
             response = requests.post(self.base_link + "add_error_message", data = json.dumps({'text':message, "error_type": ""}))
             pass
 
-    def _is_platform_online(self):
+    def is_platform_online(self):
         """
         This method is used to check if the platform is online.
         """

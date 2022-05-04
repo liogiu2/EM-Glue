@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sql_app import crud, models, schemas
 from sql_app.database import SessionLocal, engine
 from utilities import read_json_file
+import logging
 
 def get_db():
     db = SessionLocal()

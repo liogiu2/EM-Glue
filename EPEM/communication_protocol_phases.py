@@ -9,7 +9,7 @@ def phase1(db: Session, text: str, communication_phase_messages: dict):
     This function is used to represent the phase 1 of the communication protocol.
     """
     if text.startswith(communication_phase_messages["PHASE_1"]["message_1"]):
-        name = text.removeprefix(communication_phase_messages["PHASE_1"]["message_1"])
+        name = text[len(communication_phase_messages["PHASE_1"]["message_1"]):]
     else:
         raise HTTPException(status_code=400, detail= "Invalid message, expecting message starting with'" + communication_phase_messages["PHASE_1"]["message_1"] + "' got '" + text + "'")
     
@@ -34,7 +34,7 @@ def phase2(db: Session, text: str, communication_phase_messages: dict):
     This function is used to represent the phase 2 of the communication protocol.
     """
     if text.startswith(communication_phase_messages["PHASE_2"]["message_3"]):
-        name = text.removeprefix(communication_phase_messages["PHASE_2"]["message_3"])
+        name = name = text[len(communication_phase_messages["PHASE_2"]["message_3"]):]
     else:
         raise HTTPException(status_code=400, detail= "Invalid message, expecting message starting with'" + communication_phase_messages["PHASE_2"]["message_3"] + "' got '" + text + "'")
 

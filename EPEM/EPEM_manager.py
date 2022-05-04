@@ -4,7 +4,7 @@ from sql_app.database import SessionLocal
 from utilities import singleton, read_json_file
 import time
 import requests
-from EPEM_start import start_environment
+from EPEM_start import start_environment, start_experience_manager
 
 class EPEM_Manager:
 
@@ -13,6 +13,7 @@ class EPEM_Manager:
     _env_id = None
 
     def __init__(self):
+        print("EPEM Manager starting...")
         self.communication_phase_messages = read_json_file("messages.json")
         self.communication_urls = read_json_file("parameters.json")['url']
         self.phase3_part1_received = False
@@ -24,12 +25,19 @@ class EPEM_Manager:
         """
         This method is the main loop of the EPEM. 
         """
+        print("EPEM Manager started")
+        print("EPEM Manager waiting for platform online")
         self.wait_platform_online()
         
+        print("EPEM starting PHASE_1")
         self._change_protocol_phase("PHASE_1")
+
+        print("EPEM starting experience manager")
+        start_experience_manager()
 
         self._communication_setup()
 
+        print("EPEM starting main loop...")
         while self._is_platform_online():
             with SessionLocal() as db:
                 message = crud.get_first_message_not_sent_for_platform(db)
@@ -54,14 +62,22 @@ class EPEM_Manager:
                 text = str(message.text)
 
             if protocol_phase== "PHASE_1":
+                print("EPEM PHASE_1 executing...")
                 self._communication_protocol_phase_1(text)
+                print("EPEM PHASE_1 executed")
             elif protocol_phase == "PHASE_2":
+                print("EPEM PHASE_2 executing...")
                 self._communication_protocol_phase_2(text)
+                print("EPEM PHASE_2 executed")
             elif protocol_phase == "PHASE_3":
+                print("EPEM PHASE_3 executing...")
                 self._communication_protocol_phase_3(text)
             elif protocol_phase == "PHASE_4":
+                print("EPEM PHASE_4 executing...")
                 self._communication_protocol_phase_4(text)
+                print("EPEM PHASE_4 executed")
                 break
+        print("EPEM communication setup finished")
     
     def _communication_protocol_phase_1(self, text : str):
         """
@@ -101,7 +117,7 @@ class EPEM_Manager:
                     pass
             self._change_protocol_phase("PHASE_3")
     
-    def _communication_protocol_phase_3(self, text):
+    def _communication_protocol_phase_3(self, text : str):
         """
         This method is used to handle the third phase of the communication protocol
         
@@ -112,9 +128,11 @@ class EPEM_Manager:
         """
         if text == self.communication_phase_messages["PHASE_3"]["message_5"]:
             self.phase3_part1_received = True
+            print("EPEM PHASE_3 Experience Manager received")
         elif text.startswith(self.communication_phase_messages["PHASE_3"]["message_6"]):
             self.phase3_part2_received = True
             self.pddl_text = str(text)
+            print("EPEM PHASE_3 ENV received")
         
         if self.phase3_part1_received and self.phase3_part2_received:
             with SessionLocal() as db:
@@ -123,6 +141,7 @@ class EPEM_Manager:
                 except (exceptions.InvalidMessageIDException, exceptions.InvalidUserException):
                     pass
                 self._change_protocol_phase("PHASE_4")
+                print("EPEM PHASE_3 executed")
     
     def _communication_protocol_phase_4(self, text):
         """
