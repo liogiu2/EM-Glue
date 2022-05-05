@@ -92,24 +92,17 @@ class PlatformCommunication:
             if inizialization:
                 if type(message) == str:
                     data = {'text': message}
-                    print("building data: " + str(data))
                     response = requests.get(self.base_link + self.initial_message_link, params=data)
                 elif type(message) == dict:
                     response = requests.get(self.base_link + self.initial_message_link, params=message)
                 else:
                     return None
             else:
-                'to_user_role'
-                message_preparation = json.dumps({
-                    'text':message,
-                    'to_user_role' : 'PLATFORM'
-                })
-                response = requests.post(self.base_link + self.send_message_link, json = message_preparation)
+                response = requests.post(self.base_link + self.send_message_link, json = json.dumps({'text':message}))
 
             if response.status_code == 200:
                 return response.json()
             else:
-                debugpy.breakpoint()
                 raise Exception("Error sending message to platform. status code: " + str(response.status_code))
     
     def get_received_message(self):

@@ -1,5 +1,6 @@
 from platform_communication import PlatformCommunication
 import time
+import jsonpickle
 
 class ExperienceManager:
 
@@ -83,7 +84,11 @@ class ExperienceManager:
         while True:
             message = self.platform_communication.get_received_message()
             if message is not None:
-                print("Received message: " + message['text'])
+                changed_relations = []
+                for item in message:
+                    rel = jsonpickle.decode(item['text'])
+                    changed_relations.append(rel)
+                print("Received message: " + str(changed_relations))
             time.sleep(1)
 
 if __name__ == '__main__':

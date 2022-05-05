@@ -19,8 +19,11 @@ class EPEM_Manager:
         self.phase3_part1_received = False
         self.phase3_part2_received = False
         self.pddl_text = ""
-        self.__API_online = self._is_platform_online()
-
+        self.__number_of_requests = 100
+        self.__platform_online = False
+        self.__max_number_of_requests = 20
+        self.__API_online = self._is_platform_online(initialization=True)
+        
     def main_loop(self):
         """
         This method is the main loop of the EPEM. 
@@ -202,20 +205,37 @@ class EPEM_Manager:
         This method is used to wait until the platform is online.
         """
         while not self.__API_online:
-            self.__API_online = self._is_platform_online()
+            self.__API_online = self._is_platform_online(initialization=True)
             if self.__API_online:
                 break
             time.sleep(0.5)
     
-    def _is_platform_online(self):
+    def _is_platform_online(self, initialization = False):
         """
         This method is used to check if the platform is online.
         """
-        try:
-            response = requests.head("http://127.0.0.1:8080/")
-            if response.status_code == 200:
-                return True
-            else:
+        base_link = "http://127.0.0.1:8080/"
+        if initialization:
+            try:
+                response = requests.head(base_link, timeout=0.5)
+                if response.status_code == 200:
+                    return True
+                else:
+                    return False
+            except:
                 return False
-        except:
-            return False
+        else:
+            if self.__number_of_requests > self.__max_number_of_requests:
+                try:
+                    response = requests.head(base_link, timeout=0.5)
+                    if response.status_code == 200:
+                        self.__platform_online = True
+                    else:
+                        self.__platform_online = False
+                except:
+                    self.__platform_online = False
+                self.__number_of_requests = 0
+            else:
+                self.__number_of_requests += 1
+            
+            return self.__platform_online
