@@ -37,7 +37,11 @@ class ExperienceManager:
             raise Exception("Error: Communication with platform failed.")
         if response['text'] == self.platform_communication.get_handshake_message("PHASE_3", "message_7"):
             self.PDDL_domain_text = str(response['domain'])
+            print("--------------------------------------Domain received--------------------------------------")
+            print(self.PDDL_domain_text)
             self.PDDL_problem_text = str(response['problem'])
+            print("--------------------------------------Problem received--------------------------------------")
+            print(self.PDDL_problem_text)
             print("Handshake -- phase 3 successful.")
         else:
             raise Exception("Error: Received unexpected message: " + response['text'])
@@ -48,8 +52,10 @@ class ExperienceManager:
         if response is None:
             raise Exception("Error: Communication with platform failed.")
         if response['text'] == self.platform_communication.get_handshake_message("PHASE_4", "message_10"):
-            self.platform_communication.receive_message_link = response['get_message_url']
-            self.platform_communication.send_message_link = response['add_message_url']
+            self.platform_communication.receive_message_link = response['get_message_url'].replace("/", "")
+            print("Receive message link received: /" + self.platform_communication.receive_message_link)
+            self.platform_communication.send_message_link = response['add_message_url'].replace("/", "")
+            print("Send message link received: /" + self.platform_communication.send_message_link)
             print("Handshake -- phase 4 successful.")
         else:
             raise Exception("Error: Received unexpected message: " + response['text'])
@@ -69,7 +75,15 @@ class ExperienceManager:
             time.sleep(0.1)
 
     def main_loop(self):
+        """
+        This is the main loop of the experience manager.
+        """
+        self.platform_communication.start_receiving_messages()
+
         while True:
+            message = self.platform_communication.get_received_message()
+            if message is not None:
+                print("Received message: " + message['text'])
             time.sleep(1)
 
 if __name__ == '__main__':

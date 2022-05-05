@@ -43,7 +43,10 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("usage: python EPEM.py <optional> -d")
+            print("usage: python EPEM.py <optional> -d -l -S")
+            print("optional: -d to start the debug using debugpy on port 5678")
+            print("optional: -l to start the logging")
+            print("optional: -S to start the API server")
             sys.exit()
         elif opt == '-d':
             import debugpy
