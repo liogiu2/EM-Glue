@@ -177,6 +177,7 @@ def add_environment_message(item: schemas.MessageReceive, db: Session = Depends(
 
     try:
         res = crud.create_message(db=db, item=message)
+        print(parameters["url"]["in_env"]+" -- Message created: " + str(message))
     except InvalidMessageIDException as e:
         raise HTTPException(status_code=400, detail= str(e))
     except InvalidUserException as e:
@@ -216,6 +217,7 @@ def add_experience_manager_message(item: schemas.MessageReceive, db: Session = D
 
     try:
         res = crud.create_message(db=db, item=message)
+        print(parameters["url"]["in_em"]+" -- Message created: " + str(message))
     except InvalidMessageIDException as e:
         raise HTTPException(status_code=400, detail= str(e))
     except InvalidUserException as e:
