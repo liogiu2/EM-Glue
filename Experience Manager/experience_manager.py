@@ -1,6 +1,16 @@
+import os
+import sys
+
+if os.name == 'nt':
+    pddl_path = "C:\\Users\\giulio17\\Documents\\Camelot_work\\EV_PDDL"
+else:
+    pddl_path = "/Users/giuliomori/Documents/GitHub/EV_PDDL/"
+
+sys.path.insert(0, pddl_path)
 from platform_communication import PlatformCommunication
 import time
 import jsonpickle
+from ev_pddl.PDDL import PDDL_Parser
 
 class ExperienceManager:
 
@@ -9,6 +19,9 @@ class ExperienceManager:
 
     def __init__(self) -> None:
         self.platform_communication = PlatformCommunication()
+        self._PDDL_parser = PDDL_Parser()
+        self.domain = None
+        self.problem = None
 
     def start_platform_communication(self):
         """
@@ -80,7 +93,18 @@ class ExperienceManager:
         This is the main loop of the experience manager.
         """
         self.platform_communication.start_receiving_messages()
+        
+        # import debugpy
+        # debugpy.listen(5678)
+        # debugpy.wait_for_client()
+        # debugpy.breakpoint()
 
+        self.domain = self._PDDL_parser.parse_domain(domain_str = self.PDDL_domain_text)
+        print("Domain parsed correcly")
+        self.problem = self._PDDL_parser.parse_problem(problem_str = self.PDDL_problem_text)
+        print("Problem parsed correcly")
+
+        print("Starting normal communication...")
         while True:
             message = self.platform_communication.get_received_message()
             if message is not None:
