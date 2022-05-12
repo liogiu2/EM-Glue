@@ -98,7 +98,11 @@ class PlatformCommunication:
                 else:
                     return None
             else:
-                response = requests.post(self.base_link + self.send_message_link, json = json.dumps({'text':message}))
+                message_preparation = {
+                    'text':message,
+                    'to_user_role' : 'ENV'
+                }
+                response = requests.post(self.base_link + self.send_message_link, json = message_preparation)
 
             if response.status_code == 200:
                 return response.json()

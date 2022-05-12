@@ -11,6 +11,10 @@ from platform_communication import PlatformCommunication
 import time
 import jsonpickle
 from ev_pddl.PDDL import PDDL_Parser
+from ev_pddl.world_state import WorldState
+from ev_pddl.action import Action
+import input_timeout
+import threading
 
 class ExperienceManager:
 
@@ -20,8 +24,6 @@ class ExperienceManager:
     def __init__(self) -> None:
         self.platform_communication = PlatformCommunication()
         self._PDDL_parser = PDDL_Parser()
-        self.domain = None
-        self.problem = None
 
     def start_platform_communication(self):
         """
@@ -51,11 +53,9 @@ class ExperienceManager:
             raise Exception("Error: Communication with platform failed.")
         if response['text'] == self.platform_communication.get_handshake_message("PHASE_3", "message_7"):
             self.PDDL_domain_text = str(response['domain'])
-            print("--------------------------------------Domain received--------------------------------------")
-            print(self.PDDL_domain_text)
+            print("Domain received successfully")
             self.PDDL_problem_text = str(response['problem'])
-            print("--------------------------------------Problem received--------------------------------------")
-            print(self.PDDL_problem_text)
+            print("Problem received successfully")
             print("Handshake -- phase 3 successful.")
         else:
             raise Exception("Error: Received unexpected message: " + response['text'])
@@ -94,17 +94,21 @@ class ExperienceManager:
         """
         self.platform_communication.start_receiving_messages()
         
+        self.domain = self._PDDL_parser.parse_domain(domain_str = self.PDDL_domain_text)
+        # self.domain = self._PDDL_parser.parse_domain(domain_filename="domain.pddl")
+        print("Domain parsed correcly")
+        self.problem = self._PDDL_parser.parse_problem(problem_str = self.PDDL_problem_text)
+        # self.problem = self._PDDL_parser.parse_problem(problem_filename="problem.pddl")
+        print("Problem parsed correcly")
+        self.environment_state = WorldState()
+        self.environment_state.create_worldstate_from_problem(problem = self.problem, domain=self.domain)
         # import debugpy
         # debugpy.listen(5678)
         # debugpy.wait_for_client()
         # debugpy.breakpoint()
-
-        self.domain = self._PDDL_parser.parse_domain(domain_str = self.PDDL_domain_text)
-        print("Domain parsed correcly")
-        self.problem = self._PDDL_parser.parse_problem(problem_str = self.PDDL_problem_text)
-        print("Problem parsed correcly")
-
         print("Starting normal communication...")
+        print("Press something to start the action builder...")
+        thread = None
         while True:
             message = self.platform_communication.get_received_message()
             if message is not None:
@@ -112,8 +116,88 @@ class ExperienceManager:
                 for item in message:
                     rel = jsonpickle.decode(item['text'])
                     changed_relations.append(rel)
-                print("Received message: " + str(changed_relations))
-            time.sleep(1)
+                if thread is None or thread.is_alive() == False:
+                    print("Received message: " + str(changed_relations))
+                self.update_environment_state(changed_relations)
+            if thread is None or thread.is_alive() == False:
+                try:
+                    answer = input_timeout.input_with_timeout("", 1)
+                except input_timeout.TimeoutExpired:
+                    pass
+                else:
+                    thread = threading.Thread(target=self.create_action_to_send_to_environment, daemon=True)
+                    thread.start()
+    
+    def update_environment_state(self, changed_relations):
+        """
+        This method is used to update the environment state.
+        """
+        for item in changed_relations:
+            for rel in item:
+                if rel[0] == 'new':
+                    self.environment_state.add_relation_from_PDDL(rel[1])
+                elif rel[0] == 'changed_value':
+                    PDDL_relation = self.environment_state.create_relation_from_PDDL(rel[1])
+                    environment_state_relation = self.environment_state.find_relation(relation = PDDL_relation, exclude_value = True)
+                    environment_state_relation.modify_value(PDDL_relation.value)
+
+    def create_action_to_send_to_environment(self):
+        """
+        This method is used to create the action to send to the environment.
+        """
+        print("You entered the action builder.")
+        i = 0
+        for action in self.domain.actions:
+            print(str(i) + "- Action: " + action.name)
+            i += 1
+        print("Write the number of the action you want to create and press enter. To exit press a letter.")
+        something = input()
+        if something.isdigit():
+            i = int(something)
+            action = self.domain.actions[i]
+            print("Your selected action: ")
+            print(action.to_PDDL())
+            print("Now choose the parameters of the action.")
+            dict_param = {}
+            for param in action.parameters:
+                print(param)
+                print("Choose the entity with type " + param.type.name + ":")
+                entities = self.environment_state.find_entities_with_type(type = param.type.name)
+                self.print_entities(entities)
+                entity = input("Write the number of the entity and press enter:")
+                if entity.isdigit() and int(entity) < len(entities):
+                    dict_param[param.name] = entities[int(entity)]
+                else:
+                    print("You have chosen to exit the action builder.")
+                    return
+            action_real = Action(action_definition=action, parameters=dict_param)
+            result, reason = self.environment_state.can_action_be_applied(action_real, return_reason = True)
+            if result:
+                message = action_real.get_string_execution()
+                print("Action created: " + message)
+                print("Sending action to environment...")
+                try:
+                    result = self.platform_communication.send_message(message)
+                except Exception as e:
+                    print("Error while sending action to environment: " + str(e))
+                finally:
+                    print("Action sent to environment.")
+            else:
+                print("The action cannot be applied because: " + reason)
+                print("I'm not sending the action to Camelot. Please try again.")
+        else:
+            return
+
+    def print_entities(self, entities):
+        for j in range(0, len(entities), 2):
+            if j+1 < len(entities):
+                m = str(j) + ": " + str(entities[j]) +"\t\t\t\t" + str(j+1) + ": " + str(entities[j+1])
+            else:
+                m = str(j) + ": " + str(entities[j])
+            print(m)
+
+
+
 
 if __name__ == '__main__':
     print("Starting Experience Manager...")
