@@ -1,21 +1,16 @@
 import os
 import sys
 from utilities import read_json_file
-
+from pathlib import Path
 parameters = read_json_file("parameters.json")
 if os.name == 'nt':
-    pddl_path = parameters["Windows"]["PDDL_library_path"]
     environment_command = parameters["Windows"]["environment_command"]
     em_command = parameters["Windows"]["experience_manager_command"]
 else:
-    pddl_path = parameters["MAC"]["PDDL_library_path"]
     environment_command = parameters["MAC"]["environment_command"]
     em_command = parameters["MAC"]["experience_manager_command"]
-
-sys.path.insert(0, pddl_path)
 import logging
 import getopt
-from pathlib import Path
 from datetime import datetime
 import subprocess
 import atexit
@@ -37,7 +32,7 @@ def main(argv):
     except FileNotFoundError:
         pass
     try:
-        opts, args = getopt.getopt(argv,"hdlS")
+        opts, args = getopt.getopt(argv,"hdl")
     except getopt.GetoptError:
         print('Parameter not recognized')
         sys.exit(2)
@@ -46,7 +41,6 @@ def main(argv):
             print("usage: python EPEM.py <optional> -d -l -S")
             print("optional: -d to start the debug using debugpy on port 5678")
             print("optional: -l to start the logging")
-            print("optional: -S to start the API server")
             sys.exit()
         elif opt == '-d':
             import debugpy
@@ -56,18 +50,21 @@ def main(argv):
             logname = "logEPEM"+datetime.now().strftime("%d%m%Y%H%M%S")+".log"
             Path("logs/python/").mkdir(parents=True, exist_ok=True)
             logging.basicConfig(filename='logs/python/'+logname, filemode='w', format='%(levelname)s:%(message)s', level=logging.DEBUG)
-        elif opt == '-S':
-            try:
-                os.chdir("EPEM")
-            except FileNotFoundError:
-                pass
-            Path("db/").mkdir(parents=True, exist_ok=True)
-            global fastapi_process
-            print(os.getcwd())
-            fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--port", "8080", "--log-config", ".\log\log.ini"])
-            atexit.register(close_all)
+
+    try:
+        os.chdir("EPEM")
+    except FileNotFoundError:
+        pass
+    Path("db/").mkdir(parents=True, exist_ok=True)
+    global fastapi_process
+    print(os.getcwd())
+    fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--port", "8080", "--log-config", ".\log\log.ini"])
+    atexit.register(close_all)
     
-    EPEM_manager.EPEM_Manager().main_loop()
+    try:
+        EPEM_manager.EPEM_Manager().main_loop()
+    except Exception as e:
+        print(e)
 
 def start_environment():
     global environment_process

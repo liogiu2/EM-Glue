@@ -1,15 +1,13 @@
 {
     "MAC": 
     {
-        "PDDL_library_path" : "/Users/giuliomori/Documents/GitHub/EV_PDDL/",
         "environment_command" : "cd /Users/giuliomori/Downloads/Camelot\\ v1.1\\ MacOS.app/Contents/MacOS/ && open ./Camelot\\ v1.1\\ MacOS",
         "experience_manager_command" : ""
     },
     "Windows": 
     {
-        "PDDL_library_path" : "C:\\Users\\giulio17\\Documents\\Camelot_work\\EV_PDDL",
         "environment_command" : "cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe",
-        "experience_manager_command" : "cd \"C:\\Users\\giulio17\\Documents\\Camelot_work\\EPEM\\Experience Manager\" && python experience_manager.py"
+        "experience_manager_command" : "python ..\\..\\experience_manager\\experience_manager.py"
     },
     "url": 
     {
