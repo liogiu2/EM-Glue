@@ -2,7 +2,7 @@
     "MAC": 
     {
         "environment_command" : "cd /Users/giuliomori/Downloads/Camelot\\ v1.1\\ MacOS.app/Contents/MacOS/ && open ./Camelot\\ v1.1\\ MacOS",
-        "experience_manager_command" : ""
+        "experience_manager_command" : "python ..\\..\\experience_manager\\experience_manager.py"
     },
     "Windows": 
     {
