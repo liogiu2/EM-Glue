@@ -245,8 +245,8 @@ def add_error_message(item: schemas.ErrorCreate, db: Session = Depends(get_db)):
     or HTTPException error 400
         if the message was not added.
     """
-    if not _is_communication_enabled(db):
-        raise HTTPException(status_code=404)
+    # if not _is_communication_enabled(db):
+    #     raise HTTPException(status_code=404)
 
     res = crud.create_error(db=db, item=item)
     if res is None:

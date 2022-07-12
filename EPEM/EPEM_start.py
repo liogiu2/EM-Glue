@@ -24,7 +24,8 @@ def close_all():
     global fastapi_process, environment_process, em_process
     fastapi_process.terminate()
     environment_process.kill()
-    em_process.kill()
+    if os.name == 'nt':
+        em_process.kill()
 
 def main(argv):
     try:
@@ -58,7 +59,10 @@ def main(argv):
     Path("db/").mkdir(parents=True, exist_ok=True)
     global fastapi_process
     print(os.getcwd())
-    fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--port", "8080", "--log-config", ".\log\log.ini"])
+    if os.name == 'nt':
+        fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--port", "8080", "--log-config", ".\log\log.ini"])
+    else:
+        fastapi_process= subprocess.Popen(["uvicorn", "API_communication:app", "--port", "8080", "--log-config", "./log/log.ini"])
     atexit.register(close_all)
     
     try:
@@ -74,7 +78,12 @@ def start_environment():
 def start_experience_manager():
     global em_process
     if em_process is None:
-        em_process = subprocess.Popen("start cmd.exe /k \"" + em_command + "\"", shell = True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        if os.name == 'nt':
+            em_process = subprocess.Popen("start cmd.exe /k \"" + em_command + "\"", shell = True)
+        else:
+            from applescript import tell
+            tell.app('Terminal', 'do script "' + em_command + '"')
+            em_process = 'something'
 
 if __name__ == '__main__':
     main(sys.argv[1:])
