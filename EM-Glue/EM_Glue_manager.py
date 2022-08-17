@@ -4,9 +4,9 @@ from sql_app.database import SessionLocal
 from utilities import singleton, read_json_file
 import time
 import requests
-from EPEM_start import start_environment, start_experience_manager
+from EM_Glue_start import start_environment, start_experience_manager
 
-class EPEM_Manager:
+class EM_Glue_Manager:
 
     _em_id = None
     _plt_id = None

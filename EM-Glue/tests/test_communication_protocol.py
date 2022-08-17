@@ -1,7 +1,7 @@
 import unittest
 from fastapi.testclient import TestClient
 from API_communication import *
-import EPEM_manager
+import EM_Glue_manager
 from unittest.mock import patch, PropertyMock
 from sql_app import crud
 from sql_app.database import SessionLocal
@@ -44,12 +44,12 @@ class TestCommunicationProtocol(unittest.TestCase):
 
     @patch("communication_protocol_phases._wait_and_return_message_for")
     @patch("EPEM_manager.start_environment")
-    @patch.object(EPEM_manager.EPEM_Manager, "_is_platform_online")
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_is_platform_online")
     def test_phase_1_Platform(self, mock_is_platform_online, mock_start_environment, mock_wait_and_return_message_for):
         mock_is_platform_online.return_value = True
         mock_wait_and_return_message_for.return_value = {"text": ""}
         with TestClient(app) as client:
-            epem = EPEM_manager.EPEM_Manager()
+            epem = EM_Glue_manager.EM_Glue_Manager()
             t = threading.Thread(target = epem.main_loop)
             t.start()
             time.sleep(1)
@@ -93,14 +93,14 @@ class TestCommunicationProtocol(unittest.TestCase):
         self.assertEqual(response.json()['text'], self.communication_phase_messages["PHASE_2"]["message_4"])
     
     @patch("communication_protocol_phases._wait_and_return_message_for")
-    @patch.object(EPEM_manager.EPEM_Manager, "_plt_id")
-    @patch.object(EPEM_manager.EPEM_Manager, "_is_platform_online")
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_plt_id")
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_is_platform_online")
     def test_phase_2_Platform(self, mock_is_platform_online, mock_plt_id, mock_wait_and_return_message_for):
         mock_is_platform_online.return_value = True
         mock_plt_id.return_value = 1
         mock_wait_and_return_message_for.return_value = {"text": ""}
         with TestClient(app) as client:
-            epem = EPEM_manager.EPEM_Manager()
+            epem = EM_Glue_manager.EM_Glue_Manager()
             t = threading.Thread(target = epem.main_loop)
             t.start()
             time.sleep(1)
@@ -164,16 +164,16 @@ class TestCommunicationProtocol(unittest.TestCase):
         self.assertTrue(mock_wait_and_return_message_for.called)
         self.assertEqual(mock_wait_and_return_message_for.call_args[0][0], "ENV")
     
-    @patch.object(EPEM_manager.EPEM_Manager, "_env_id", 3)
-    @patch.object(EPEM_manager.EPEM_Manager, "_em_id", 2)
-    @patch.object(EPEM_manager.EPEM_Manager, "_plt_id", 1)
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_env_id", 3)
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_em_id", 2)
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_plt_id", 1)
     @patch("communication_protocol_phases._wait_and_return_message_for")
-    @patch.object(EPEM_manager.EPEM_Manager, "_is_platform_online")
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_is_platform_online")
     def test_phase_3_Platform(self, mock_is_platform_online, mock_wait_and_return_message_for):
         mock_is_platform_online.return_value = True
         mock_wait_and_return_message_for.return_value = {"text" : self.communication_phase_messages["PHASE_3"]["message_6"] + "###" + "this is a domain" + "###" + "this is a problem"}
         with TestClient(app) as client:
-            epem = EPEM_manager.EPEM_Manager()
+            epem = EM_Glue_manager.EM_Glue_Manager()
             t = threading.Thread(target = epem.main_loop)
             t.start()
             time.sleep(1)
@@ -225,16 +225,16 @@ class TestCommunicationProtocol(unittest.TestCase):
         self.assertIsNotNone(response.json()['add_message_url'])
         self.assertIsNotNone(response.json()['get_message_url'])
 
-    @patch.object(EPEM_manager.EPEM_Manager, "_env_id", 3)
-    @patch.object(EPEM_manager.EPEM_Manager, "_em_id", 2)
-    @patch.object(EPEM_manager.EPEM_Manager, "_plt_id", 1)
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_env_id", 3)
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_em_id", 2)
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_plt_id", 1)
     @patch("communication_protocol_phases._wait_and_return_message_for")
-    @patch.object(EPEM_manager.EPEM_Manager, "_is_platform_online")
+    @patch.object(EM_Glue_manager.EM_Glue_Manager, "_is_platform_online")
     def test_phase_4_Platform(self, mock_is_platform_online, mock_wait_and_return_message_for):
         mock_is_platform_online.return_value = True
         mock_wait_and_return_message_for.return_value = {"text": "let's try###url###url"}
         with TestClient(app) as client:
-            epem = EPEM_manager.EPEM_Manager()
+            epem = EM_Glue_manager.EM_Glue_Manager()
             t = threading.Thread(target = epem.main_loop)
             t.start()
             time.sleep(1)

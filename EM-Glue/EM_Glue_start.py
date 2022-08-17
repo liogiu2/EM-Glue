@@ -14,7 +14,7 @@ import getopt
 from datetime import datetime
 import subprocess
 import atexit
-import EPEM_manager
+import EM_Glue_manager
 
 fastapi_process = None
 environment_process = None
@@ -66,7 +66,7 @@ def main(argv):
     atexit.register(close_all)
     
     try:
-        EPEM_manager.EPEM_Manager().main_loop()
+        EM_Glue_manager.EM_Glue_Manager().main_loop()
     except Exception as e:
         print(e)
 
