@@ -37,7 +37,7 @@ How to run an experience using the platform.
    ```
 	cd Platform\EM-Glue\EM-Glue
 	python EM_Glue_start.py
-  ```
+	```
 
 As soon as the program starts executing it starts the APIs and the experience manager.
 A new command prompt will open that contains the experience manager process.  
