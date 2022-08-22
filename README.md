@@ -13,7 +13,7 @@ The documentation is under construction.
 
 ## Installation
 There are 5 main pieces of software that we need to create a succesfull experience. 
-First, Camelot (http://cs.uky.edu/~sgware/projects/camelot/v1-2/) that is a publicly available software and not part of the software developed for the paper. 
+First, [Camelot](http://cs.uky.edu/~sgware/projects/camelot/v1-2/) that is a publicly available software and not part of the software developed for the paper. 
 Second, EV_PDDL, library that uses PDDL as representation of the state. 
 Third, [Camelot-Wrapper](https://github.com/liogiu2/Camelot-Wrapper). This contains the python scripts used by Camelot to communicate with the Platform.
 Fourth, EM-Glue, that is the platform that is created to manage the communication between experience manager and environment.
@@ -21,19 +21,23 @@ Fifth, Experiece Manager, a dummy experience manager that implements the communi
 
 For everything to work properly, we require to use Windows.
 Installation instructions:
-1) Install python 3.8.10 https://www.python.org/downloads/release/python-3810/ (please select the "add to PATH" option)
-2) Download and unzip Camelot http://cs.uky.edu/~sgware/projects/camelot/v1-2/
+1) Install [python 3.8.10](https://www.python.org/downloads/release/python-3810/) (please select the "add to PATH" option)
+2) Download and unzip [Camelot](http://cs.uky.edu/~sgware/projects/camelot/v1-2/)
 3) (To be edited) Move the folder called "Platform" with all the files we provided into the Camelot folder (where the Camelot.exe is located). Please be sure that inside the "Platform" folder there are other 4 folders ("camelot_Wrapper", "EM-Glue", "EV_PDDL", "experience_manager") and one txt file ("requirement.txt"). The program works with relative paths and it is important to have the correct path. 
 4) Open Camelot folder and edit the "StartExperienceManager.bat" file by deliting its content and writing:
-	 python Platform\camelot_wrapper\camelot_wrapper\camelot_wrapper.py
+   ```
+   python Platform\camelot_wrapper\camelot_wrapper\camelot_wrapper.py
+   ```
    Then, Save and close the file.
-5) Open a Command Prompt, and navigate inside the Platform folder (that should be located inside the Camelot folder if instruction #3 was followed). Run the following command "pip install -r requirements.txt". This should install all the python dependencies that the program we wrote needs to work correctly.
+5) Open a Command Prompt, and navigate inside the Platform folder (that should be located inside the Camelot folder if instruction #3 was followed). Run the following command ```pip install -r requirements.txt```. This should install all the python dependencies that the program we wrote needs to work correctly.
 
 How to run an experience using the platform.
 1) Open a Command Prompt, and navigate inside the Camelot folder.
 2) Write and execute the following instructions:
+   ```
 	cd Platform\EM-Glue\EM-Glue
 	python EM_Glue_start.py
+  ```
 
 As soon as the program starts executing it starts the APIs and the experience manager.
 A new command prompt will open that contains the experience manager process.  
