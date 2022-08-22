@@ -1,0 +1,27 @@
+authors:
+  - given-names: Giulio
+    family-names: Mori
+    email: giulio17@ru.is
+    affiliation: Reykjavik University
+    orcid: 'https://orcid.org/0000-0001-7685-9637'
+cff-version: 1.2.0
+message: "Please cite this software using this citation."
+preferred-citation:
+  authors:
+    - given-names: Giulio
+      family-names: Mori
+      email: giulio17@ru.is
+      affiliation: Reykjavik University
+      orcid: 'https://orcid.org/0000-0001-7685-9637'
+    - given-names: David
+      family-names: Thue
+      affiliation: Carleton University
+    - given-names: Stephan
+      family-names: Schiffel
+      affiliation: Reykjavik University
+  title: "EM-Glue: A Platform for Decoupling Experience Managers and Environments"
+  type: conference-paper
+  year: 2022
+  conference: "18th AAAI Conference on Artificial Intelligence and Interactive Digital Entertainment (AIIDE-22)"
+  publisher: "AAAI Press"
+title: "EM-Glue"
