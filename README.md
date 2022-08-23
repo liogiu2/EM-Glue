@@ -17,7 +17,7 @@ First, [Camelot](http://cs.uky.edu/~sgware/projects/camelot/v1-2/) that is a pub
 Second, [EV_PDDL](https://github.com/liogiu2/EV_PDDL/tree/camelot_dev), library that uses PDDL as representation of the state. 
 Third, [Camelot-Wrapper](https://github.com/liogiu2/Camelot-Wrapper). This contains the python scripts used by Camelot to communicate with the Platform.
 Fourth, EM-Glue, that is the platform that is created to manage the communication between experience manager and environment.
-Fifth, Experiece Manager, a dummy experience manager that implements the communication protocol and the normal communication. It allows to receive messages from the environment, and send actions to the environments that the environment executes. To do so, we created a wizard to build a successful action before sending it to the environment.
+Fifth, [Experiece Manager](https://github.com/liogiu2/EM-for-EM-Glue), a dummy experience manager that implements the communication protocol and the normal communication. It allows to receive messages from the environment, and send actions to the environments that the environment executes. To do so, we created a wizard to build a successful action before sending it to the environment.
 
 For everything to work properly, we require to use Windows.
 Installation instructions:
