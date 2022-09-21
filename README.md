@@ -11,6 +11,9 @@ The project is actively under developement. Once all the major components will b
 ## Documentation
 The documentation is under construction. 
 
+### Communication Protocol
+![Alt text](graphics/communication_protocol.pdf?raw=true)
+
 ## Installation
 There are 5 main pieces of software that we need to create a succesfull experience. 
 First, [Camelot](http://cs.uky.edu/~sgware/projects/camelot/v1-2/) that is a publicly available software and not part of the software developed for the paper. 
