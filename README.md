@@ -12,7 +12,7 @@ The project is actively under developement. Once all the major components will b
 The documentation is under construction. 
 
 ### Communication Protocol
-![Alt text](graphics/communication_protocol.pdf?raw=true)
+![Alt text](graphics/communication_protocol.png?raw=true)
 
 ## Installation
 There are 5 main pieces of software that we need to create a succesfull experience. 
