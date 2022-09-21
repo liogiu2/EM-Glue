@@ -2,7 +2,7 @@
     "MAC": 
     {
         "environment_command" : "cd /Users/giuliomori/Downloads/Camelot\\ v1.1\\ MacOS.app/Contents/MacOS/ && open ./Camelot\\ v1.1\\ MacOS",
-        "experience_manager_command" : "source /Users/giuliomori/Documents/GitHub/camelot_communicator/camelot_env/bin/activate && python /Users/giuliomori/Documents/GitHub/EM-for-EPEM/experience_manager.py"
+        "experience_manager_command" : "source /Users/giuliomori/Documents/GitHub/camelot_communicator/camelot_env/bin/activate && python /Users/giuliomori/Documents/GitHub/PaSSAGE-for-EMGlue/experience_manager.py"
     },
     "Windows": 
     {

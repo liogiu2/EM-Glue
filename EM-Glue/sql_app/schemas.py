@@ -124,5 +124,6 @@ class Inizialization(BaseModel):
     text : str
     domain : Optional[str]
     problem : Optional[str]
+    additional_data : Optional[str]
     add_message_url : Optional[str]
     get_message_url : Optional[str]

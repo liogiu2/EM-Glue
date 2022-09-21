@@ -75,7 +75,8 @@ def phase3_EM(db: Session, text: str, communication_phase_messages: dict):
     return {
         "text" : text.split("###")[0],
         "domain" : text.split("###")[1],
-        "problem" : text.split("###")[2]
+        "problem" : text.split("###")[2],
+        "additional_data" : text.split("###")[3]
     }
 
 def phase3_4_ENV(db: Session, item: schemas.Inizialization, communication_phase_messages: dict):
@@ -89,7 +90,10 @@ def phase3_4_ENV(db: Session, item: schemas.Inizialization, communication_phase_
 
     env_user_id = crud.get_user_with_role(db, role="ENV").id_user
 
-    message_text =item.text + "###" + item.domain + "###" + item.problem
+    message_text = item.text + "###" + item.domain + "###" + item.problem + "###"
+
+    if item.additional_data is not None:
+        message_text += item.additional_data
 
     try:
         crud.create_message(db=db, item=schemas.MessageCreate(text=message_text, from_user = env_user_id, to_user = platform.id_user))
