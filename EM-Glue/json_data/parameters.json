@@ -6,8 +6,8 @@
     },
     "Windows": 
     {
-        "environment_command" : "cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.1 Windows\\Camelot v1.1 Windows\" && Camelot.exe",
-        "experience_manager_command" : "python ..\\..\\experience_manager\\experience_manager.py"
+        "environment_command" : "cd \"C:\\Users\\giulio17\\Desktop\\Camelot v1.2 Windows\\Camelot v1.2 Windows\" && Camelot.exe",
+        "experience_manager_command" : "python C:\\Users\\giulio17\\Documents\\Camelot_work\\PaSSAGE-for-EMGlue\\experience_manager.py"
     },
     "url": 
     {
