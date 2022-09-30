@@ -24,7 +24,7 @@ Fifth, [Experiece Manager](https://github.com/liogiu2/EM-for-EM-Glue), a dummy e
 
 For everything to work properly, we require to use Windows.
 Installation instructions:
-1) Install [python 3.8.10](https://www.python.org/downloads/release/python-3810/) (please select the "add to PATH" option)
+1) Install [python 3.9.1](https://www.python.org/downloads/release/python-391/) (please select the "add to PATH" option)
 2) Download and unzip [Camelot](http://cs.uky.edu/~sgware/projects/camelot/v1-2/)
 3) (To be edited) Move the folder called "Platform" with all the files we provided into the Camelot folder (where the Camelot.exe is located). Please be sure that inside the "Platform" folder there are other 4 folders ("camelot_Wrapper", "EM-Glue", "EV_PDDL", "experience_manager") and one txt file ("requirement.txt"). The program works with relative paths and it is important to have the correct path. 
 4) Open Camelot folder and edit the ```StartExperienceManager.bat``` file by deliting its content and writing:
