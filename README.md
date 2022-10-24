@@ -8,6 +8,9 @@ Camelot with the use of [Camelot-Wrapper](https://github.com/liogiu2/Camelot-Wra
 ## Project Status
 The project is actively under developement. Once all the major components will be ready there will be a release. 
 
+## AIIDE 2022 build
+[Here](https://drive.google.com/drive/folders/1NeWnOh8ikErnFRSn8KiRclOmUaI1r-2u?usp=sharing) you can find the build submitted with the AIIDE 2022 Paper. You can download it and follow the instructions in the README file to have it working.
+
 ## Documentation
 The documentation is under construction. 
 
