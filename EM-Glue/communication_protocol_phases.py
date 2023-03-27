@@ -72,11 +72,12 @@ def phase3_EM(db: Session, text: str, communication_phase_messages: dict):
         raise HTTPException(status_code=400, detail= str(e))
 
     text = _wait_and_return_message_for("EM", db)["text"]
+    text_parts = text.split("###")
     return {
-        "text" : text.split("###")[0],
-        "domain" : text.split("###")[1],
-        "problem" : text.split("###")[2],
-        "additional_data" : text.split("###")[3]
+        "text" : text_parts[0],
+        "domain" : text_parts[1],
+        "problem" : text_parts[2],
+        "additional_data" : text_parts[3]
     }
 
 def phase3_4_ENV(db: Session, item: schemas.Inizialization, communication_phase_messages: dict):
@@ -103,10 +104,11 @@ def phase3_4_ENV(db: Session, item: schemas.Inizialization, communication_phase_
         raise HTTPException(status_code=400, detail= str(e))
     
     text = _wait_and_return_message_for("ENV", db)["text"]
+    text_parts = text.split("###")
     return {
-        "text" : text.split("###")[0],
-        "add_message_url" : text.split("###")[1],
-        "get_message_url" : text.split("###")[2]
+        "text" : text_parts[0],
+        "add_message_url" : text_parts[1],
+        "get_message_url" : text_parts[2]
     }
 
 def phase4_EM(db: Session, text: str, communication_phase_messages: dict):

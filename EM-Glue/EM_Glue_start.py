@@ -39,7 +39,7 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("usage: python EPEM.py <optional> -d -l -S")
+            print("usage: python EM_Glue_start.py <optional> -d -l -S")
             print("optional: -d to start the debug using debugpy on port 5678")
             print("optional: -l to start the logging")
             sys.exit()
