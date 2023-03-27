@@ -2,6 +2,9 @@
 EM-Glue is a software architecture and platform that decouples EMs from environments while facilitating communication between them. 
 The platform enables the exchange of messages in a standardized way so that different EMs and environments can work together using a common architecture.
 
+# New release is about to come out. This page is under manteinance.
+![work in progress](https://icambrogiolorenzetti.edu.it/wp-content/uploads/sites/91/Work-in-progress-1024x603-1.png?x67262)
+
 ## Compatible Environments
 Camelot with the use of [Camelot-Wrapper](https://github.com/liogiu2/Camelot-Wrapper)
 
